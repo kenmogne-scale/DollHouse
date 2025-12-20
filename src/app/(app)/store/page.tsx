@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { deleteOutfitAction } from "@/app/(app)/store/actions";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { DemoStore } from "@/components/demo/DemoStore";
+import { StorePinCard } from "@/components/store/StorePinCard";
 
 type OutfitWithItems = {
   id: string;
@@ -95,54 +96,47 @@ export default async function StorePage() {
     })),
   }));
 
+  // Import delete action
+  const { deleteOutfitAction } = await import("@/app/(app)/store/actions");
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-semibold text-slate-800">My Store ✦</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Deine gespeicherten Outfits – als glossy Showroom Grid.
-          </p>
-        </div>
-        <Button asChild variant="primary">
-          <Link href="/outfits/builder">New Outfit ✦</Link>
+      {/* Pinterest-style Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-2xl font-bold text-slate-900">Meine Outfits</h1>
+        <Button asChild variant="primary" className="gap-2 rounded-full px-5">
+          <Link href="/outfits/builder">
+            <Plus className="h-4 w-4" />
+            Erstellen
+          </Link>
         </Button>
       </div>
 
       {outfits.length === 0 ? (
-        <div className="glass-card rounded-3xl p-6 text-sm text-slate-500">
-          Noch keine Outfits. Bau eins im{" "}
-          <Link className="underline decoration-red-300 underline-offset-2 text-red-600 font-medium" href="/outfits/builder">
-            Outfit Builder
-          </Link>
-          .
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-pink-100">
+            <Plus className="h-8 w-8 text-rose-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-800">Noch keine Outfits</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Erstelle deine erste Collage im Builder
+          </p>
+          <Button asChild variant="primary" className="mt-4 gap-2 rounded-full">
+            <Link href="/outfits/builder">
+              <Plus className="h-4 w-4" />
+              Outfit erstellen
+            </Link>
+          </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        /* Pinterest Masonry Grid */
+        <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 xl:columns-5">
           {outfits.map((o) => (
-            <div key={o.id} className="glass-card shine rounded-3xl p-4">
-              <Link href={`/store/${o.id}`} className="block">
-                <OutfitPreview items={o.items} />
-                <div className="mt-4 px-1">
-                  <div className="truncate text-base font-semibold text-slate-800">{o.name}</div>
-                  <div className="mt-1 text-xs text-slate-400">
-                    {new Date(o.created_at).toLocaleDateString("de-DE")}
-                  </div>
-                </div>
-              </Link>
-
-              <div className="mt-4 flex items-center gap-2">
-                <Button asChild variant="ghost" size="sm" className="flex-1">
-                  <Link href={`/outfits/builder?outfitId=${o.id}`}>Bearbeiten</Link>
-                </Button>
-                <form action={deleteOutfitAction} className="flex-1">
-                  <input type="hidden" name="outfitId" value={o.id} />
-                  <Button type="submit" variant="secondary" size="sm" className="w-full">
-                    Löschen
-                  </Button>
-                </form>
-              </div>
-            </div>
+            <StorePinCard
+              key={o.id}
+              outfit={o}
+              deleteAction={deleteOutfitAction}
+            />
           ))}
         </div>
       )}
@@ -150,77 +144,3 @@ export default async function StorePage() {
   );
 }
 
-function OutfitPreview({
-  items,
-}: {
-  items: Array<{
-    clothing_item_id: string;
-    x: number;
-    y: number;
-    scale: number;
-    rotation: number;
-    z_index: number;
-    imageUrl: string;
-  }>;
-}) {
-  const validItems = items.filter((i) => i.imageUrl);
-
-  if (validItems.length === 0) {
-    return (
-      <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-red-50 via-white to-rose-50 shadow-sm flex items-center justify-center">
-        <span className="text-slate-300 text-sm">Keine Items</span>
-      </div>
-    );
-  }
-
-  // Builder board is 600x600, item base size is 120
-  // Convert to percentages for responsive preview
-  const boardSize = 600;
-  const itemBaseSize = 120;
-
-  return (
-    <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
-      <div className="relative w-full h-full">
-        {validItems
-          .slice()
-          .sort((a, b) => a.z_index - b.z_index)
-          .map((item, idx) => {
-            // Convert positions to percentages
-            const leftPercent = (item.x / boardSize) * 100;
-            const topPercent = (item.y / boardSize) * 100;
-            const sizePercent = (itemBaseSize / boardSize) * 100;
-
-            return (
-              <div
-                key={`${item.clothing_item_id}-${idx}`}
-                className="absolute"
-                style={{
-                  left: `${leftPercent}%`,
-                  top: `${topPercent}%`,
-                  width: `${sizePercent}%`,
-                  height: `${sizePercent}%`,
-                }}
-              >
-                <div
-                  className="w-full h-full"
-                  style={{
-                    transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
-                    transformOrigin: "center",
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    className="h-full w-full object-contain"
-                    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            );
-          })}
-      </div>
-    </div>
-  );
-}

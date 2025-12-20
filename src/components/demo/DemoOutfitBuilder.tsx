@@ -257,11 +257,17 @@ export function DemoOutfitBuilder() {
             ))}
           </div>
 
-          {/* Board - responsive height */}
+          {/* Board - Hochformat (Breite: 450px, Höhe: 600px = 3:4 Ratio) */}
           <div
             ref={boardRef}
-            className="relative aspect-square sm:aspect-auto sm:h-[500px] lg:h-[550px] w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 shadow-inner"
-            style={{ backgroundColor: bgColor, touchAction: "none" }}
+            className="relative mx-auto overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 shadow-inner"
+            style={{ 
+              backgroundColor: bgColor, 
+              touchAction: "none",
+              width: "450px",
+              maxWidth: "100%",
+              aspectRatio: "3 / 4",
+            }}
             onClick={() => setSelected(null)}
           >
             {placed

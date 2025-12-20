@@ -240,11 +240,17 @@ export function OutfitBuilderClient({
             )}
           </div>
 
-          {/* Board */}
+          {/* Board - Hochformat (Breite: 450px, Höhe: 600px = 3:4 Ratio) */}
           <div
             ref={boardRef}
-            className="relative h-[600px] w-full overflow-hidden rounded-3xl border border-slate-200 shadow-inner"
-            style={{ backgroundColor: bgColor, touchAction: "none" }}
+            className="relative mx-auto overflow-hidden rounded-3xl border border-slate-200 shadow-inner"
+            style={{ 
+              backgroundColor: bgColor, 
+              touchAction: "none",
+              width: "450px",
+              maxWidth: "100%",
+              aspectRatio: "3 / 4",
+            }}
             onClick={() => setSelected(null)}
           >
             {placed
