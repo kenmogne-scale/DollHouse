@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Download, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
@@ -31,7 +30,6 @@ export function StoreDetailClient({
   items: StoreDetailItem[];
   deleteAction: (formData: FormData) => Promise<void>;
 }) {
-  const router = useRouter();
   const boardRef = React.useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = React.useState(false);
 
