@@ -1,28 +1,60 @@
 "use client";
 
 /**
- * Removes the background from an image file and returns a PNG blob with transparency.
- * 
- * NOTE: Background removal is temporarily disabled for deployment compatibility.
- * The original image is returned as-is.
+ * Removes the background from an image file using Remove.bg API.
  * 
  * @param file - The image file to process
  * @param onProgress - Optional callback for progress updates (0-100)
- * @returns A Blob containing the image (original, without background removal)
+ * @returns A Blob containing the PNG image with transparent background
  */
 export async function removeImageBackground(
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<Blob> {
-  // Simulate progress for UI feedback
-  if (onProgress) {
-    onProgress(50);
-    await new Promise(resolve => setTimeout(resolve, 100));
-    onProgress(100);
+  try {
+    // Start progress
+    if (onProgress) {
+      onProgress(10);
+    }
+
+    // Prepare form data
+    const formData = new FormData();
+    formData.append("image", file);
+
+    // Update progress
+    if (onProgress) {
+      onProgress(30);
+    }
+
+    // Call our API route
+    const response = await fetch("/api/remove-background", {
+      method: "POST",
+      body: formData,
+    });
+
+    // Update progress
+    if (onProgress) {
+      onProgress(80);
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error(errorData.error || "Failed to remove background");
+    }
+
+    // Get the processed image blob
+    const blob = await response.blob();
+
+    // Complete progress
+    if (onProgress) {
+      onProgress(100);
+    }
+
+    return blob;
+  } catch (error) {
+    console.error("Error removing background:", error);
+    throw error;
   }
-  
-  // Return original file as blob (background removal disabled)
-  return file;
 }
 
 /**
@@ -41,13 +73,16 @@ export async function blobToDataUrl(blob: Blob): Promise<string> {
  * Converts a Blob to a File object
  */
 export function blobToFile(blob: Blob, originalFileName: string): File {
-  // Keep original extension since we're not processing
-  return new File([blob], originalFileName, { type: blob.type || "image/png" });
+  // Change extension to .png
+  const baseName = originalFileName.replace(/\.[^.]+$/, "");
+  const newFileName = `${baseName}.png`;
+  
+  return new File([blob], newFileName, { type: "image/png" });
 }
 
 /**
- * Check if the model has been loaded (useful for showing loading state)
+ * Check if the background removal service is available
  */
 export function isBackgroundRemovalModelLoaded(): boolean {
-  return true; // Always return true since we're not using the model
+  return true; // API is always "loaded"
 }
