@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh">
       <AppNavbar email={userEmail} demo={!envOk} />
-      <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6">
+      <main className="mx-auto w-full max-w-6xl px-3 pb-24 pt-4 sm:px-6 sm:pb-16 sm:pt-8">
         {children}
       </main>
     </div>

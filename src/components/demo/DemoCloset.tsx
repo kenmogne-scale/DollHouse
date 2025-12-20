@@ -39,12 +39,12 @@ export function DemoCloset() {
     filter === "all" ? items : items.filter((i) => i.category === filter);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-slate-800">My Closet ✦</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Demo Mode: Uploads werden lokal gespeichert (kein Supabase).
+          <h1 className="font-display text-xl sm:text-2xl font-semibold text-slate-800">My Closet ✦</h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+            Demo Mode: Lokal gespeichert
           </p>
         </div>
 
@@ -52,28 +52,29 @@ export function DemoCloset() {
           <Button
             type="button"
             variant="secondary"
-            className="gap-2"
+            className="gap-2 flex-1 sm:flex-none"
             onClick={() => setOpen(true)}
           >
             <Plus className="h-4 w-4" />
-            Upload
+            <span className="sm:inline">Upload</span>
           </Button>
-          <Button asChild variant="primary" className="gap-2">
+          <Button asChild variant="primary" className="gap-2 flex-1 sm:flex-none">
             <Link href="/outfits/builder">
               <Shirt className="h-4 w-4" />
-              Build Outfit
+              <span className="sm:inline">Collage</span>
             </Link>
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      {/* Horizontal scrolling filter on mobile */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
         {FILTERS.map((f) => (
           <button
             key={f.key}
             type="button"
             onClick={() => setFilter(f.key)}
-            className={`h-10 rounded-full border px-4 text-sm font-medium transition-all ${
+            className={`h-9 sm:h-10 rounded-full border px-3 sm:px-4 text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
               filter === f.key
                 ? "border-red-300 bg-red-50 text-red-700 shadow-sm"
                 : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300"

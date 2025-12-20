@@ -48,7 +48,6 @@ export function DemoOutfitBuilder() {
   const [placed, setPlaced] = React.useState<Placed[]>([]);
   const [selected, setSelected] = React.useState<string | null>(null);
   const [bgColor, setBgColor] = React.useState("#ffffff");
-  const [showColorPicker, setShowColorPicker] = React.useState(false);
 
   React.useEffect(() => {
     const items = loadJson<DemoClothingItem[]>(DEMO_ITEMS_KEY, []);
@@ -167,101 +166,101 @@ export function DemoOutfitBuilder() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-semibold text-slate-800">Collage Builder ✦</h1>
-          <p className="mt-1 text-sm text-slate-500">Demo Mode: Speichert lokal.</p>
+    <div className="space-y-3 sm:space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-display text-lg sm:text-2xl font-semibold text-slate-800 truncate">Collage Builder ✦</h1>
         </div>
-        <Button asChild variant="ghost" className="gap-2">
-          <Link href="/closet">
-            <ArrowLeft className="h-4 w-4" />
-            Closet
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button asChild variant="ghost" size="sm" className="gap-1 px-2 sm:px-3">
+            <Link href="/closet">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Closet</span>
+            </Link>
+          </Button>
+          <Button type="button" variant="primary" size="sm" className="gap-1 px-2 sm:px-3" onClick={save}>
+            <Save className="h-4 w-4" />
+            <span className="hidden sm:inline">Save ✦</span>
+          </Button>
+        </div>
       </div>
 
       {closet.length === 0 ? (
-        <div className="glass-card rounded-3xl p-6 text-sm text-slate-500">
-          Dein Closet ist leer. Upload zuerst ein paar Items in{" "}
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-sm text-slate-500">
+          Dein Closet ist leer.{" "}
           <Link className="underline decoration-red-300 underline-offset-2 text-red-600 font-medium" href="/closet">
-            /closet
+            Upload Items
           </Link>
-          .
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-        <aside className="glass-card rounded-3xl p-4">
+      {/* Mobile: Horizontal scrolling closet items */}
+      <div className="lg:hidden">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs font-medium text-slate-600">Items:</span>
+          <div className="flex gap-1.5 overflow-x-auto pb-2 flex-1">
+            {closet.map((it) => (
+              <button
+                key={it.id}
+                type="button"
+                onClick={() => addItemToBoard(it)}
+                className="flex-shrink-0 w-14 h-14 rounded-xl border border-slate-200 bg-white p-1 shadow-sm active:scale-95 transition-transform"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={it.imageDataUrl} alt="" className="w-full h-full object-contain" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+        {/* Desktop: Sidebar closet */}
+        <aside className="hidden lg:block glass-card rounded-3xl p-4">
           <div className="font-display text-sm font-semibold text-slate-700">Closet Items</div>
-          <div className="mt-3 max-h-[560px] overflow-auto pr-1">
+          <div className="mt-3 max-h-[500px] overflow-auto pr-1">
             <div className="grid grid-cols-2 gap-2">
               {closet.map((it) => (
                 <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
               ))}
             </div>
           </div>
-          <div className="mt-3 text-[11px] text-slate-400">
-            Tippe auf ein Item, um es hinzuzufügen.
-          </div>
         </aside>
 
-        <section className="space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <div className="text-xs text-slate-500">Name</div>
-              <Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 w-[min(420px,70vw)]" />
-            </div>
-
-            <Button type="button" variant="primary" className="gap-2" onClick={save}>
-              <Save className="h-4 w-4" />
-              Save ✦
-            </Button>
+        <section className="space-y-2 sm:space-y-3">
+          {/* Name input - simplified on mobile */}
+          <div className="flex items-center gap-2">
+            <Input 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              className="h-9 sm:h-10 flex-1" 
+              placeholder="Collage Name"
+            />
           </div>
 
-          {/* Background Color Selector */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="gap-2"
-              onClick={() => setShowColorPicker(!showColorPicker)}
-            >
-              <Palette className="h-4 w-4" />
-              Hintergrund
-              <div 
-                className="h-4 w-4 rounded-full border border-slate-300" 
-                style={{ backgroundColor: bgColor }}
+          {/* Background Color Selector - always visible on mobile */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+            <Palette className="h-4 w-4 text-slate-400 flex-shrink-0" />
+            {BACKGROUND_COLORS.map((color) => (
+              <button
+                key={color.id}
+                type="button"
+                onClick={() => setBgColor(color.value)}
+                className={cn(
+                  "h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 transition-all flex-shrink-0",
+                  bgColor === color.value ? "border-red-500 ring-2 ring-red-200 scale-110" : "border-slate-200"
+                )}
+                style={{ backgroundColor: color.value }}
+                title={color.label}
               />
-            </Button>
-            
-            {showColorPicker && (
-              <div className="flex items-center gap-1 flex-wrap">
-                {BACKGROUND_COLORS.map((color) => (
-                  <button
-                    key={color.id}
-                    type="button"
-                    onClick={() => {
-                      setBgColor(color.value);
-                      setShowColorPicker(false);
-                    }}
-                    className={cn(
-                      "h-7 w-7 rounded-full border-2 transition-all hover:scale-110",
-                      bgColor === color.value ? "border-red-500 ring-2 ring-red-200" : "border-slate-200"
-                    )}
-                    style={{ backgroundColor: color.value }}
-                    title={color.label}
-                  />
-                ))}
-              </div>
-            )}
+            ))}
           </div>
 
-          {/* Board */}
+          {/* Board - responsive height */}
           <div
             ref={boardRef}
-            className="relative h-[600px] w-full overflow-hidden rounded-3xl border border-slate-200 shadow-inner"
+            className="relative aspect-square sm:aspect-auto sm:h-[500px] lg:h-[550px] w-full overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 shadow-inner"
             style={{ backgroundColor: bgColor, touchAction: "none" }}
             onClick={() => setSelected(null)}
           >
@@ -283,72 +282,61 @@ export function DemoOutfitBuilder() {
               ))}
           </div>
 
-          {/* Controls */}
-          <div className="glass-card rounded-3xl p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-slate-600">
+          {/* Controls - compact for mobile */}
+          <div className="glass-card rounded-2xl sm:rounded-3xl p-2 sm:p-4">
+            <div className="flex items-center justify-between gap-2">
+              {/* Selected info */}
+              <div className="text-xs sm:text-sm text-slate-600 min-w-0 flex-shrink">
                 {selectedItem ? (
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span>
-                      Ausgewählt:{" "}
-                      <span className="font-medium text-slate-800">
-                        {selectedItem.clothingItemId.slice(0, 8)}…
-                      </span>
-                    </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500">
-                      {Math.round(selectedItem.scale * 100)}% | {selectedItem.rotation}°
-                    </span>
-                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+                    {Math.round(selectedItem.scale * 100)}% · {selectedItem.rotation}°
+                  </span>
                 ) : (
-                  "Tippe ein Item auf dem Board an."
+                  <span className="text-slate-400">Item auswählen</span>
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              {/* Control buttons - always visible */}
+              <div className="flex items-center gap-1">
                 {/* Size Controls */}
-                <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-full"
-                    disabled={!selectedItem}
-                    onClick={() =>
-                      updateSelected({ scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.1) })
-                    }
-                    title="Kleiner"
-                  >
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                  <span className="text-xs text-slate-500 w-10 text-center">
-                    {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-full"
-                    disabled={!selectedItem}
-                    onClick={() =>
-                      updateSelected({ scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.1) })
-                    }
-                    title="Größer"
-                  >
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
+                  disabled={!selectedItem}
+                  onClick={() =>
+                    updateSelected({ scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.15) })
+                  }
+                  title="Kleiner"
+                >
+                  <ZoomOut className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
+                  disabled={!selectedItem}
+                  onClick={() =>
+                    updateSelected({ scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.15) })
+                  }
+                  title="Größer"
+                >
+                  <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
 
                 {/* Rotation */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="gap-1.5"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
                   disabled={!selectedItem}
                   onClick={() => updateSelected({ rotation: ((selectedItem?.rotation ?? 0) + 15) % 360 })}
+                  title="Drehen"
                 >
-                  <RotateCw className="h-4 w-4" />
-                  +15°
+                  <RotateCw className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
 
                 {/* Delete */}
@@ -356,21 +344,17 @@ export function DemoOutfitBuilder() {
                   type="button"
                   variant="secondary"
                   size="sm"
-                  className="gap-2"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
                   disabled={!selectedItem}
                   onClick={removeSelected}
+                  title="Löschen"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Löschen
+                  <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </div>
             </div>
           </div>
         </section>
-      </div>
-
-      <div className="text-[11px] text-slate-400">
-        Tipp: Verschiebe Items per Drag. Auf Mobilgeräten: 2 Finger zum Zoomen.
       </div>
     </div>
   );
