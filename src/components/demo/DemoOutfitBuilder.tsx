@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   DndContext,
   PointerSensor,
+  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
@@ -14,14 +15,26 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw } from "lucide-react";
+import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import { loadJson, saveJson } from "@/lib/demo/storage";
 import { DEMO_ITEMS_KEY, DEMO_OUTFITS_KEY } from "@/lib/demo/constants";
 import type { DemoClothingItem, DemoOutfit, DemoOutfitItem } from "@/lib/demo/types";
-import { DollAvatar, DollAvatarBlonde, DollAvatarSelector, type DollType } from "@/components/DollAvatar";
+
+// Hintergrundfarben-Optionen
+const BACKGROUND_COLORS = [
+  { id: "white", label: "Weiß", value: "#ffffff" },
+  { id: "cream", label: "Creme", value: "#fef3e2" },
+  { id: "pink", label: "Rosa", value: "#fce7f3" },
+  { id: "lavender", label: "Lavendel", value: "#ede9fe" },
+  { id: "mint", label: "Mint", value: "#d1fae5" },
+  { id: "sky", label: "Himmelblau", value: "#e0f2fe" },
+  { id: "peach", label: "Pfirsich", value: "#fed7aa" },
+  { id: "gray", label: "Grau", value: "#f1f5f9" },
+  { id: "black", label: "Schwarz", value: "#1e293b" },
+];
 
 type Placed = {
   localId: string;
@@ -39,8 +52,10 @@ export function DemoOutfitBuilder() {
   const sp = useSearchParams();
   const outfitId = sp.get("outfitId");
 
+  // Touch + Pointer sensors für mobile Unterstützung
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
   );
   const boardRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -48,7 +63,8 @@ export function DemoOutfitBuilder() {
   const [name, setName] = React.useState("Outfit 1");
   const [placed, setPlaced] = React.useState<Placed[]>([]);
   const [selected, setSelected] = React.useState<string | null>(null);
-  const [dollType, setDollType] = React.useState<DollType>("brunette");
+  const [bgColor, setBgColor] = React.useState("#ffffff");
+  const [showColorPicker, setShowColorPicker] = React.useState(false);
 
   React.useEffect(() => {
     const items = loadJson<DemoClothingItem[]>(DEMO_ITEMS_KEY, []);
@@ -121,9 +137,19 @@ export function DemoOutfitBuilder() {
     const src = closet.find((c) => c.id === clothingItemId);
     if (!src) return;
 
-    const pe = e.activatorEvent as PointerEvent;
-    const endX = pe.clientX + delta.x;
-    const endY = pe.clientY + delta.y;
+    const pe = e.activatorEvent as PointerEvent | TouchEvent;
+    let clientX: number, clientY: number;
+    
+    if ('touches' in pe) {
+      clientX = pe.touches[0]?.clientX ?? 0;
+      clientY = pe.touches[0]?.clientY ?? 0;
+    } else {
+      clientX = pe.clientX;
+      clientY = pe.clientY;
+    }
+    
+    const endX = clientX + delta.x;
+    const endY = clientY + delta.y;
     const rect = boardRef.current?.getBoundingClientRect();
     if (!rect) return;
 
@@ -221,7 +247,7 @@ export function DemoOutfitBuilder() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-slate-800">Outfit Builder ✦</h1>
+          <h1 className="font-display text-2xl font-semibold text-slate-800">Collage Builder ✦</h1>
           <p className="mt-1 text-sm text-slate-500">Demo Mode: Speichert lokal.</p>
         </div>
         <Button asChild variant="ghost" className="gap-2">
@@ -254,14 +280,14 @@ export function DemoOutfitBuilder() {
               </div>
             </div>
             <div className="mt-3 text-[11px] text-slate-400">
-              Tipp: Klick auf ein Item, um es hinzuzufügen.
+              Tipp: Tippe auf ein Item, um es hinzuzufügen. Halte gedrückt zum Verschieben.
             </div>
           </aside>
 
           <section className="space-y-3">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
-                <div className="text-xs text-slate-500">Outfit Name</div>
+                <div className="text-xs text-slate-500">Name</div>
                 <Input value={name} onChange={(e) => setName(e.target.value)} className="h-10 w-[min(420px,70vw)]" />
               </div>
 
@@ -271,31 +297,51 @@ export function DemoOutfitBuilder() {
               </Button>
             </div>
 
-            {/* Avatar Selector */}
-            <div className="flex items-center justify-between">
-              <DollAvatarSelector selected={dollType} onSelect={setDollType} />
+            {/* Background Color Selector */}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+              >
+                <Palette className="h-4 w-4" />
+                Hintergrund
+                <div 
+                  className="h-4 w-4 rounded-full border border-slate-300" 
+                  style={{ backgroundColor: bgColor }}
+                />
+              </Button>
+              
+              {showColorPicker && (
+                <div className="flex items-center gap-1 flex-wrap">
+                  {BACKGROUND_COLORS.map((color) => (
+                    <button
+                      key={color.id}
+                      type="button"
+                      onClick={() => {
+                        setBgColor(color.value);
+                        setShowColorPicker(false);
+                      }}
+                      className={cn(
+                        "h-7 w-7 rounded-full border-2 transition-all hover:scale-110",
+                        bgColor === color.value ? "border-red-500 ring-2 ring-red-200" : "border-slate-200"
+                      )}
+                      style={{ backgroundColor: color.value }}
+                      title={color.label}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             <div
               ref={boardRef}
-              className={cn(
-                "relative h-[600px] w-full overflow-hidden rounded-3xl border border-slate-200",
-                "bg-[radial-gradient(ellipse_600px_400px_at_30%_20%,rgba(220,38,38,0.08),transparent_60%),radial-gradient(ellipse_500px_400px_at_80%_10%,rgba(251,113,133,0.10),transparent_55%),linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(250,250,250,1)_100%)]",
-                "shadow-inner",
-              )}
+              className="relative h-[600px] w-full overflow-hidden rounded-3xl border border-slate-200 shadow-inner touch-none"
+              style={{ backgroundColor: bgColor }}
             >
               <BoardDroppable id="board" />
-              
-              {/* Doll Avatar - displayed behind clothing items */}
-              {dollType !== "none" && (
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" style={{ zIndex: 0 }}>
-                  {dollType === "brunette" ? (
-                    <DollAvatar className="h-[500px] w-auto opacity-90" />
-                  ) : (
-                    <DollAvatarBlonde className="h-[500px] w-auto opacity-90" />
-                  )}
-                </div>
-              )}
 
               {placed
                 .slice()
@@ -319,7 +365,7 @@ export function DemoOutfitBuilder() {
                   {selectedItem ? (
                     <div className="flex items-center gap-3">
                       <span>
-                        Selected:{" "}
+                        Ausgewählt:{" "}
                         <span className="font-medium text-slate-800">
                           {selectedItem.clothingItemId.slice(0, 8)}…
                         </span>
@@ -390,7 +436,7 @@ export function DemoOutfitBuilder() {
                     onClick={removeSelected}
                   >
                     <Trash2 className="h-4 w-4" />
-                    Remove
+                    Löschen
                   </Button>
                 </div>
               </div>
@@ -400,7 +446,7 @@ export function DemoOutfitBuilder() {
       </DndContext>
 
       <div className="text-[11px] text-slate-400">
-        Demo Tipp: Für &quot;doll store vibe&quot; passt ein PNG mit transparentem Hintergrund am besten.
+        Tipp: Auf Mobilgeräten halte ein Item gedrückt, um es zu verschieben.
       </div>
     </div>
   );
@@ -417,7 +463,7 @@ function ClosetTile({ item, onAdd }: { item: DemoClothingItem; onAdd: () => void
       type="button"
       onClick={onAdd}
       className="glass-card shine w-full rounded-2xl p-2 text-left transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
-      title={`${item.category}${item.color ? ` · ${item.color}` : ""} – Klicken zum Hinzufügen`}
+      title={`${item.category}${item.color ? ` · ${item.color}` : ""} – Tippen zum Hinzufügen`}
     >
       {/* Checkered background to show transparency */}
       <div className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-[repeating-conic-gradient(#f1f5f9_0%_25%,#fff_0%_50%)] bg-[length:12px_12px] shadow-sm">
@@ -469,7 +515,7 @@ function PlacedItemView({
     <div
       ref={setNodeRef}
       style={outerStyle}
-      className="absolute cursor-grab select-none"
+      className="absolute cursor-grab select-none touch-none"
       onPointerDownCapture={onSelect}
       {...listeners}
       {...attributes}
