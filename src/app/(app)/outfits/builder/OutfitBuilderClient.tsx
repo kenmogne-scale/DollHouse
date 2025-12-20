@@ -12,23 +12,24 @@ import {
   ZoomOut,
   RotateCw,
   Palette,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
 import { saveOutfitAction, type SaveOutfitState } from "@/app/(app)/outfits/builder/actions";
 
-// Hintergrundfarben-Optionen
+// Hintergrundfarben-Optionen - Y2K Style
 const BACKGROUND_COLORS = [
+  { id: "black", label: "Schwarz", value: "#0a0a0a" },
+  { id: "fuchsia-dark", label: "Fuchsia Dark", value: "#3d0a2e" },
+  { id: "violet-dark", label: "Violet Dark", value: "#1e0a3d" },
+  { id: "pink", label: "Hot Pink", value: "#ff1493" },
+  { id: "lavender", label: "Lavendel", value: "#9b30ff" },
   { id: "white", label: "Weiß", value: "#ffffff" },
   { id: "cream", label: "Creme", value: "#fef3e2" },
-  { id: "pink", label: "Rosa", value: "#fce7f3" },
-  { id: "lavender", label: "Lavendel", value: "#ede9fe" },
-  { id: "mint", label: "Mint", value: "#d1fae5" },
-  { id: "sky", label: "Himmelblau", value: "#e0f2fe" },
-  { id: "peach", label: "Pfirsich", value: "#fed7aa" },
-  { id: "gray", label: "Grau", value: "#f1f5f9" },
-  { id: "black", label: "Schwarz", value: "#1e293b" },
+  { id: "silver", label: "Silver", value: "#c0c0c0" },
+  { id: "mint", label: "Mint", value: "#3d8b7a" },
 ];
 
 export type ClosetItemForBuilder = {
@@ -69,7 +70,7 @@ export function OutfitBuilderClient({
   const [selected, setSelected] = React.useState<string | null>(
     initialOutfit?.items?.[0]?.localId ?? null,
   );
-  const [bgColor, setBgColor] = React.useState("#ffffff");
+  const [bgColor, setBgColor] = React.useState("#0a0a0a");
   const [showColorPicker, setShowColorPicker] = React.useState(false);
 
   const maxZ = React.useMemo(
@@ -145,14 +146,17 @@ export function OutfitBuilderClient({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-semibold text-slate-800">Collage Builder ✦</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5 text-fuchsia-400" />
+            <h1 className="font-display text-2xl font-bold uppercase tracking-wider text-white">Collage Builder</h1>
+          </div>
+          <p className="text-sm text-white/50">
             Tippe auf Items um sie hinzuzufügen, verschiebe sie auf dem Board.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" className="gap-2">
+          <Button asChild variant="ghost" className="gap-2 normal-case">
             <Link href="/closet">
               <ArrowLeft className="h-4 w-4" />
               Closet
@@ -164,24 +168,27 @@ export function OutfitBuilderClient({
       <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
         {/* Left: closet */}
         <aside className="glass-card rounded-3xl p-4">
-          <div className="font-display text-sm font-semibold text-slate-700">Closet Items</div>
-          <div className="mt-3 max-h-[560px] overflow-auto pr-1">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="font-display text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-fuchsia-400" />
+            Closet Items
+          </div>
+          <div className="mt-4 max-h-[560px] overflow-auto pr-1">
+            <div className="grid grid-cols-2 gap-3">
               {closetItems.map((it) => (
                 <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
               ))}
             </div>
           </div>
-          <div className="mt-3 text-[11px] text-slate-400">
+          <div className="mt-4 text-[11px] text-white/40">
             Tippe auf ein Item, um es hinzuzufügen.
           </div>
         </aside>
 
         {/* Right: board */}
-        <section className="space-y-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <section className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <div className="text-xs text-slate-500">Name</div>
+              <div className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Name</div>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -202,24 +209,24 @@ export function OutfitBuilderClient({
           </div>
 
           {/* Background Color Selector */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="gap-2"
+              className="gap-2 normal-case"
               onClick={() => setShowColorPicker(!showColorPicker)}
             >
               <Palette className="h-4 w-4" />
               Hintergrund
               <div 
-                className="h-4 w-4 rounded-full border border-slate-300" 
+                className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50 shadow-[0_0_8px_rgba(255,20,147,0.3)]" 
                 style={{ backgroundColor: bgColor }}
               />
             </Button>
             
             {showColorPicker && (
-              <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
                 {BACKGROUND_COLORS.map((color) => (
                   <button
                     key={color.id}
@@ -229,8 +236,10 @@ export function OutfitBuilderClient({
                       setShowColorPicker(false);
                     }}
                     className={cn(
-                      "h-7 w-7 rounded-full border-2 transition-all hover:scale-110",
-                      bgColor === color.value ? "border-red-500 ring-2 ring-red-200" : "border-slate-200"
+                      "h-8 w-8 rounded-full border-2 transition-all duration-200 hover:scale-110",
+                      bgColor === color.value 
+                        ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 shadow-[0_0_15px_rgba(255,20,147,0.5)]" 
+                        : "border-fuchsia-500/30 hover:border-fuchsia-500/60"
                     )}
                     style={{ backgroundColor: color.value }}
                     title={color.label}
@@ -243,7 +252,7 @@ export function OutfitBuilderClient({
           {/* Board - Hochformat (Breite: 450px, Höhe: 600px = 3:4 Ratio) */}
           <div
             ref={boardRef}
-            className="relative mx-auto overflow-hidden rounded-3xl border border-slate-200 shadow-inner"
+            className="relative mx-auto overflow-hidden rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)]"
             style={{ 
               backgroundColor: bgColor, 
               touchAction: "none",
@@ -274,16 +283,16 @@ export function OutfitBuilderClient({
           {/* Controls */}
           <div className="glass-card rounded-3xl p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-white/60">
                 {selectedItem ? (
                   <div className="flex items-center gap-3 flex-wrap">
                     <span>
                       Ausgewählt:{" "}
-                      <span className="font-medium text-slate-800">
+                      <span className="font-bold text-fuchsia-400">
                         {selectedItem.clothingItemId.slice(0, 8)}…
                       </span>
                     </span>
-                    <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500">
+                    <span className="text-xs px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
                       {Math.round(selectedItem.scale * 100)}% | {selectedItem.rotation}°
                     </span>
                   </div>
@@ -294,12 +303,12 @@ export function OutfitBuilderClient({
 
               <div className="flex flex-wrap items-center gap-2">
                 {/* Size Controls */}
-                <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1">
+                <div className="flex items-center gap-1 rounded-full border-2 border-fuchsia-500/30 bg-black/50 p-1">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 rounded-full"
+                    className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
                     disabled={!selectedItem}
                     onClick={() =>
                       updateSelected({
@@ -310,14 +319,14 @@ export function OutfitBuilderClient({
                   >
                     <ZoomOut className="h-4 w-4" />
                   </Button>
-                  <span className="text-xs text-slate-500 w-10 text-center">
+                  <span className="text-xs text-fuchsia-300 w-10 text-center font-bold">
                     {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
                   </span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 rounded-full"
+                    className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
                     disabled={!selectedItem}
                     onClick={() =>
                       updateSelected({
@@ -335,7 +344,7 @@ export function OutfitBuilderClient({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="gap-1.5"
+                  className="gap-1.5 normal-case"
                   disabled={!selectedItem}
                   onClick={() =>
                     updateSelected({
@@ -365,7 +374,7 @@ export function OutfitBuilderClient({
         </section>
       </div>
       
-      <div className="text-[11px] text-slate-400">
+      <div className="text-[11px] text-white/30 text-center">
         Tipp: Verschiebe Items per Drag. Auf Mobilgeräten: 2 Finger zum Zoomen.
       </div>
     </div>
@@ -393,16 +402,16 @@ function ClosetTile({ item, onAdd }: { item: ClosetItemForBuilder; onAdd: () => 
     <button
       type="button"
       onClick={onAdd}
-      className="glass-card shine w-full rounded-2xl p-2 text-left transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+      className="glass-card shine w-full rounded-2xl p-2 text-left transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(255,20,147,0.3)] active:scale-[0.97]"
       title={`${item.category}${item.color ? ` · ${item.color}` : ""} – Tippen zum Hinzufügen`}
     >
-      <div className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-[repeating-conic-gradient(#f1f5f9_0%_25%,#fff_0%_50%)] bg-[length:12px_12px] shadow-sm">
+      <div className="aspect-square overflow-hidden rounded-xl border-2 border-fuchsia-500/20 bg-[repeating-conic-gradient(#1a1a2e_0%_25%,#0a0a15_0%_50%)] bg-[length:12px_12px] shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.imageUrl} alt={item.category} className="h-full w-full object-contain" />
+        <img src={item.imageUrl} alt={item.category} className="h-full w-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-[11px] text-slate-600 capitalize">{item.category}</span>
-        <span className="text-[10px] text-red-500">+ Add</span>
+        <span className="text-[11px] text-white/60 capitalize font-medium">{item.category}</span>
+        <span className="text-[10px] text-fuchsia-400 font-bold uppercase">+ Add</span>
       </div>
     </button>
   );
@@ -563,13 +572,16 @@ function PlacedItemView({
             src={item.imageUrl} 
             alt="" 
             className="h-full w-full object-contain pointer-events-none" 
-            style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" }}
+            style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
             draggable={false}
           />
           {selected && (
             <div 
-              className="absolute inset-0 rounded-lg ring-2 ring-red-400 ring-offset-0 pointer-events-none" 
-              style={{ background: "radial-gradient(circle, rgba(220,38,38,0.1) 0%, transparent 70%)" }} 
+              className="absolute inset-0 rounded-lg ring-2 ring-fuchsia-500 ring-offset-0 pointer-events-none" 
+              style={{ 
+                background: "radial-gradient(circle, rgba(255,20,147,0.15) 0%, transparent 70%)",
+                boxShadow: "0 0 20px rgba(255,20,147,0.4)"
+              }} 
             />
           )}
         </div>

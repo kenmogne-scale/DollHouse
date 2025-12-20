@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { loadJson, saveJson } from "@/lib/demo/storage";
 import { DEMO_ITEMS_KEY, DEMO_OUTFITS_KEY } from "@/lib/demo/constants";
@@ -32,8 +32,11 @@ export function DemoStore() {
     <div className="space-y-6">
       {/* Pinterest-style Header */}
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-slate-900">Meine Outfits</h1>
-        <Button asChild variant="primary" className="gap-2 rounded-full px-5">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-fuchsia-400" />
+          <h1 className="font-display text-2xl font-bold uppercase tracking-wider text-white">Meine Outfits</h1>
+        </div>
+        <Button asChild variant="primary" className="gap-2">
           <Link href="/outfits/builder">
             <Plus className="h-4 w-4" />
             Erstellen
@@ -43,14 +46,14 @@ export function DemoStore() {
 
       {outfits.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-pink-100">
-            <Plus className="h-8 w-8 text-rose-400" />
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 border-2 border-fuchsia-500/30 shadow-[0_0_30px_rgba(255,20,147,0.2)]">
+            <Plus className="h-8 w-8 text-fuchsia-400" />
           </div>
-          <h2 className="text-lg font-semibold text-slate-800">Noch keine Outfits</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wider text-white">Noch keine Outfits</h2>
+          <p className="mt-2 text-sm text-white/50">
             Erstelle deine erste Collage im Builder
           </p>
-          <Button asChild variant="primary" className="mt-4 gap-2 rounded-full">
+          <Button asChild variant="primary" className="mt-6 gap-2">
             <Link href="/outfits/builder">
               <Plus className="h-4 w-4" />
               Outfit erstellen
@@ -93,20 +96,20 @@ function PinCard({
     >
       {/* Pin Image */}
       <Link href={`/store/${outfit.id}`} className="block">
-        <div className="relative overflow-hidden rounded-2xl bg-slate-100 shadow-sm transition-all duration-200 group-hover:shadow-xl">
+        <div className="relative overflow-hidden rounded-3xl border-2 border-fuchsia-500/30 bg-black/50 shadow-[0_8px_32px_rgba(255,20,147,0.15)] transition-all duration-300 group-hover:shadow-[0_0_40px_rgba(255,20,147,0.3)] group-hover:border-fuchsia-500/50 group-hover:scale-[1.02]">
           <OutfitPreview outfit={outfit} itemsById={itemsById} />
           
           {/* Hover Overlay */}
           <div 
-            className={`absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent transition-opacity duration-200 ${
+            className={`absolute inset-0 bg-gradient-to-t from-black/80 via-fuchsia-950/30 to-transparent transition-opacity duration-300 ${
               isHovered ? 'opacity-100' : 'opacity-0'
             }`}
           />
           
           {/* Hover Actions */}
           <div 
-            className={`absolute top-2 right-2 flex gap-1.5 transition-all duration-200 ${
-              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            className={`absolute top-3 right-3 flex gap-2 transition-all duration-300 ${
+              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
             }`}
           >
             <button
@@ -116,7 +119,7 @@ function PinCard({
                 e.stopPropagation();
                 onDelete();
               }}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-lg backdrop-blur-sm transition-colors hover:bg-red-500 hover:text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-fuchsia-500/30 bg-black/80 text-white/70 shadow-lg backdrop-blur-sm transition-all duration-200 hover:bg-fuchsia-500 hover:text-white hover:border-fuchsia-500 hover:shadow-[0_0_15px_rgba(255,20,147,0.5)]"
               title="Löschen"
             >
               <Trash2 className="h-4 w-4" />
@@ -125,23 +128,23 @@ function PinCard({
 
           {/* Bottom Info on Hover */}
           <div 
-            className={`absolute bottom-0 left-0 right-0 p-3 transition-all duration-200 ${
-              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            className={`absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 ${
+              isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
             }`}
           >
-            <div className="flex items-end justify-between gap-2">
+            <div className="flex items-end justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-sm font-semibold text-white drop-shadow-sm">
+                <h3 className="truncate font-display text-sm font-bold uppercase tracking-wider text-white drop-shadow-lg">
                   {outfit.name}
                 </h3>
-                <p className="text-xs text-white/70">
+                <p className="text-xs text-white/50">
                   {new Date(outfit.createdAt).toLocaleDateString("de-DE")}
                 </p>
               </div>
               <Link
                 href={`/outfits/builder?outfitId=${outfit.id}`}
                 onClick={(e) => e.stopPropagation()}
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white text-slate-700 shadow-lg transition-transform hover:scale-110"
+                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-fuchsia-500/50 bg-gradient-to-br from-fuchsia-500 to-violet-500 text-white shadow-[0_0_15px_rgba(255,20,147,0.4)] transition-all duration-200 hover:scale-110 hover:shadow-[0_0_25px_rgba(255,20,147,0.6)]"
                 title="Bearbeiten"
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -180,8 +183,9 @@ function OutfitPreview({
 
   if (placedItems.length === 0) {
     return (
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-red-50 via-white to-rose-50 shadow-sm flex items-center justify-center" style={{ aspectRatio: "3/4" }}>
-        <span className="text-slate-300 text-sm">Keine Items</span>
+      <div className="overflow-hidden flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-fuchsia-950/30 to-violet-950/30" style={{ aspectRatio: "3/4" }}>
+        <Sparkles className="h-6 w-6 text-fuchsia-500/50" />
+        <span className="text-white/30 text-sm uppercase tracking-wider">Keine Items</span>
       </div>
     );
   }
@@ -193,7 +197,7 @@ function OutfitPreview({
   const itemBaseSize = 120;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-md bg-white" style={{ aspectRatio: "3/4" }}>
+    <div className="overflow-hidden bg-black" style={{ aspectRatio: "3/4" }}>
       <div className="relative w-full h-full">
         {placedItems
           .slice()
@@ -227,7 +231,7 @@ function OutfitPreview({
                     src={item.imageDataUrl}
                     alt=""
                     className="h-full w-full object-contain"
-                    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
+                    style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.4))" }}
                   />
                 </div>
               </div>

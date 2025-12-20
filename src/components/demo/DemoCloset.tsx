@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Plus, Shirt, Sparkles } from "lucide-react";
+import { Plus, Shirt, Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
@@ -42,13 +42,16 @@ export function DemoCloset() {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-semibold text-slate-800">My Closet ✦</h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5 text-fuchsia-400" />
+            <h1 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-wider text-white">My Closet</h1>
+          </div>
+          <p className="text-xs sm:text-sm text-white/50">
             Demo Mode: Lokal gespeichert
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             type="button"
             variant="secondary"
@@ -67,17 +70,17 @@ export function DemoCloset() {
         </div>
       </div>
 
-      {/* Horizontal scrolling filter on mobile */}
+      {/* Filter Chips */}
       <div className="flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
         {FILTERS.map((f) => (
           <button
             key={f.key}
             type="button"
             onClick={() => setFilter(f.key)}
-            className={`h-9 sm:h-10 rounded-full border px-3 sm:px-4 text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+            className={`h-9 sm:h-10 rounded-full border-2 px-3 sm:px-5 text-xs font-bold uppercase tracking-wider transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
               filter === f.key
-                ? "border-red-300 bg-red-50 text-red-700 shadow-sm"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300"
+                ? "border-fuchsia-500 bg-fuchsia-500/20 text-fuchsia-300 shadow-[0_0_15px_rgba(255,20,147,0.3)]"
+                : "border-fuchsia-500/30 bg-black/30 text-white/60 hover:bg-fuchsia-500/10 hover:text-white/80 hover:border-fuchsia-500/50"
             }`}
           >
             {f.label}
@@ -86,28 +89,30 @@ export function DemoCloset() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="glass-card rounded-3xl p-6 text-sm text-slate-500">
-          Noch keine Items. Klick auf <span className="font-medium text-red-600">Upload</span>.
+        <div className="glass-card rounded-3xl p-8 text-center">
+          <Sparkles className="h-8 w-8 text-fuchsia-500/50 mx-auto mb-3" />
+          <p className="text-sm text-white/50">
+            Noch keine Items. Klick auf <span className="font-bold text-fuchsia-400">Upload</span>.
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((item) => (
-            <div key={item.id} className="glass-card shine rounded-3xl p-3">
-              <div className="relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-[repeating-conic-gradient(#f1f5f9_0%_25%,#fff_0%_50%)] bg-[length:16px_16px] shadow-sm">
-                {/* Checkered background to show transparency */}
+            <div key={item.id} className="glass-card shine rounded-3xl p-3 glow-hover">
+              <div className="relative aspect-square overflow-hidden rounded-2xl border-2 border-fuchsia-500/20 bg-[repeating-conic-gradient(#1a1a2e_0%_25%,#0a0a15_0%_50%)] bg-[length:16px_16px] shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.imageDataUrl}
                   alt={`${item.category}${item.color ? ` (${item.color})` : ""}`}
-                  className="h-full w-full object-contain"
+                  className="h-full w-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
                   loading="lazy"
                 />
               </div>
               <div className="mt-3 px-1">
-                <div className="text-xs font-medium text-slate-700 capitalize">
+                <div className="text-xs font-bold uppercase tracking-wider text-white capitalize">
                   {item.category}
                 </div>
-                <div className="text-[11px] text-slate-400">{item.color ?? "—"}</div>
+                <div className="text-[11px] text-white/40">{item.color ?? "—"}</div>
               </div>
             </div>
           ))}
@@ -193,23 +198,23 @@ function DemoUploadModal({
 
   return (
     <Modal open={open} onClose={onClose} title="Upload Item (Demo) ✦">
-      <form onSubmit={submit} className="space-y-3">
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Bild</label>
-          <Input ref={fileRef} type="file" accept="image/*" required disabled={busy} />
-          <p className="text-[11px] text-slate-400">
-            <Sparkles className="inline h-3 w-3 mr-1" />
+      <form onSubmit={submit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Bild</label>
+          <Input ref={fileRef} type="file" accept="image/*" required disabled={busy} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:uppercase file:bg-fuchsia-500/20 file:text-fuchsia-400 hover:file:bg-fuchsia-500/30 file:cursor-pointer" />
+          <p className="text-[11px] text-white/40 flex items-center gap-1.5">
+            <Sparkles className="inline h-3 w-3 text-fuchsia-400" />
             Der Hintergrund wird automatisch entfernt (max. 10MB).
           </p>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Kategorie</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Kategorie</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as DemoCategory)}
             disabled={busy}
-            className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] shadow-sm disabled:opacity-50"
+            className="h-12 w-full rounded-2xl border-2 border-fuchsia-500/30 bg-black/50 px-4 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-50 cursor-pointer"
           >
             <option value="tops">Tops</option>
             <option value="bottoms">Bottoms</option>
@@ -218,20 +223,20 @@ function DemoUploadModal({
           </select>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Farbe (optional)</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Farbe (optional)</label>
           <Input value={color} onChange={(e) => setColor(e.target.value)} disabled={busy} />
         </div>
 
         {busy && (
-          <div className="space-y-2">
+          <div className="space-y-3 p-4 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-600">{status}</span>
-              <span className="text-slate-400">{progress}%</span>
+              <span className="text-fuchsia-300 font-medium">{status}</span>
+              <span className="text-fuchsia-400 font-bold">{progress}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-black/50">
               <div
-                className="h-full bg-gradient-to-r from-red-400 to-red-500 transition-all duration-300"
+                className="h-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-fuchsia-500 transition-all duration-300 shadow-[0_0_10px_rgba(255,20,147,0.5)]"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -246,7 +251,7 @@ function DemoUploadModal({
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
+              <Upload className="h-4 w-4" />
               Upload & Freistellen ✦
             </>
           )}

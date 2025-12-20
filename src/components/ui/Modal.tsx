@@ -44,30 +44,33 @@ export function Modal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
+          {/* Backdrop */}
           <button
             aria-label="Close modal"
-            className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-md"
             onClick={onClose}
             type="button"
           />
 
+          {/* Modal */}
           <motion.div
             role="dialog"
             aria-modal="true"
             className={cn(
-              "glass-card absolute left-1/2 top-1/2 w-[min(92vw,520px)] -translate-x-1/2 -translate-y-1/2 rounded-3xl p-5 sm:p-6 border-red-200/30",
-              "shadow-2xl shadow-red-500/10",
+              "glass-card absolute left-1/2 top-1/2 w-[min(92vw,520px)] -translate-x-1/2 -translate-y-1/2 rounded-3xl p-6 sm:p-8",
+              "border-2 border-fuchsia-500/40",
+              "shadow-[0_0_60px_rgba(255,20,147,0.3),0_25px_50px_rgba(0,0,0,0.5)]",
               className,
             )}
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 14, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 260, damping: 24 }}
+            exit={{ opacity: 0, y: 16, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
           >
-            <div className="mb-4 flex items-start justify-between gap-4">
+            <div className="mb-5 flex items-start justify-between gap-4">
               <div className="min-w-0">
                 {title ? (
-                  <div className="font-display text-lg font-semibold leading-6 text-slate-800">
+                  <div className="font-display text-xl font-bold uppercase tracking-wider text-white">
                     {title}
                   </div>
                 ) : null}
@@ -75,7 +78,7 @@ export function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="grid h-10 w-10 place-items-center rounded-2xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+                className="grid h-10 w-10 place-items-center rounded-full border-2 border-fuchsia-500/30 bg-black/50 text-fuchsia-400 hover:bg-fuchsia-500/20 hover:text-fuchsia-300 hover:border-fuchsia-500/50 transition-all duration-200 hover:shadow-[0_0_15px_rgba(255,20,147,0.3)]"
               >
                 <X className="h-5 w-5" />
               </button>

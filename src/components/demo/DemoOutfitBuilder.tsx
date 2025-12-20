@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette } from "lucide-react";
+import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
@@ -12,17 +12,17 @@ import { loadJson, saveJson } from "@/lib/demo/storage";
 import { DEMO_ITEMS_KEY, DEMO_OUTFITS_KEY } from "@/lib/demo/constants";
 import type { DemoClothingItem, DemoOutfit, DemoOutfitItem } from "@/lib/demo/types";
 
-// Hintergrundfarben-Optionen
+// Hintergrundfarben-Optionen - Y2K Style
 const BACKGROUND_COLORS = [
+  { id: "black", label: "Schwarz", value: "#0a0a0a" },
+  { id: "fuchsia-dark", label: "Fuchsia Dark", value: "#3d0a2e" },
+  { id: "violet-dark", label: "Violet Dark", value: "#1e0a3d" },
+  { id: "pink", label: "Hot Pink", value: "#ff1493" },
+  { id: "lavender", label: "Lavendel", value: "#9b30ff" },
   { id: "white", label: "Weiß", value: "#ffffff" },
   { id: "cream", label: "Creme", value: "#fef3e2" },
-  { id: "pink", label: "Rosa", value: "#fce7f3" },
-  { id: "lavender", label: "Lavendel", value: "#ede9fe" },
-  { id: "mint", label: "Mint", value: "#d1fae5" },
-  { id: "sky", label: "Himmelblau", value: "#e0f2fe" },
-  { id: "peach", label: "Pfirsich", value: "#fed7aa" },
-  { id: "gray", label: "Grau", value: "#f1f5f9" },
-  { id: "black", label: "Schwarz", value: "#1e293b" },
+  { id: "silver", label: "Silver", value: "#c0c0c0" },
+  { id: "mint", label: "Mint", value: "#3d8b7a" },
 ];
 
 type Placed = {
@@ -47,7 +47,7 @@ export function DemoOutfitBuilder() {
   const [name, setName] = React.useState("Outfit 1");
   const [placed, setPlaced] = React.useState<Placed[]>([]);
   const [selected, setSelected] = React.useState<string | null>(null);
-  const [bgColor, setBgColor] = React.useState("#ffffff");
+  const [bgColor, setBgColor] = React.useState("#0a0a0a");
 
   React.useEffect(() => {
     const items = loadJson<DemoClothingItem[]>(DEMO_ITEMS_KEY, []);
@@ -170,10 +170,13 @@ export function DemoOutfitBuilder() {
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-lg sm:text-2xl font-semibold text-slate-800 truncate">Collage Builder ✦</h1>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-fuchsia-400" />
+            <h1 className="font-display text-lg sm:text-2xl font-bold uppercase tracking-wider text-white truncate">Collage Builder</h1>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Button asChild variant="ghost" size="sm" className="gap-1 px-2 sm:px-3">
+          <Button asChild variant="ghost" size="sm" className="gap-1 px-2 sm:px-3 normal-case">
             <Link href="/closet">
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Closet</span>
@@ -187,9 +190,9 @@ export function DemoOutfitBuilder() {
       </div>
 
       {closet.length === 0 ? (
-        <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-sm text-slate-500">
+        <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 text-sm text-white/50">
           Dein Closet ist leer.{" "}
-          <Link className="underline decoration-red-300 underline-offset-2 text-red-600 font-medium" href="/closet">
+          <Link className="underline decoration-fuchsia-400 underline-offset-2 text-fuchsia-400 font-bold" href="/closet">
             Upload Items
           </Link>
         </div>
@@ -198,14 +201,14 @@ export function DemoOutfitBuilder() {
       {/* Mobile: Horizontal scrolling closet items */}
       <div className="lg:hidden">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-medium text-slate-600">Items:</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-400">Items:</span>
           <div className="flex gap-1.5 overflow-x-auto pb-2 flex-1">
             {closet.map((it) => (
               <button
                 key={it.id}
                 type="button"
                 onClick={() => addItemToBoard(it)}
-                className="flex-shrink-0 w-14 h-14 rounded-xl border border-slate-200 bg-white p-1 shadow-sm active:scale-95 transition-transform"
+                className="flex-shrink-0 w-14 h-14 rounded-xl border-2 border-fuchsia-500/30 bg-black/50 p-1 shadow-sm active:scale-95 transition-transform hover:border-fuchsia-500/60"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={it.imageDataUrl} alt="" className="w-full h-full object-contain" />
@@ -218,9 +221,12 @@ export function DemoOutfitBuilder() {
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         {/* Desktop: Sidebar closet */}
         <aside className="hidden lg:block glass-card rounded-3xl p-4">
-          <div className="font-display text-sm font-semibold text-slate-700">Closet Items</div>
-          <div className="mt-3 max-h-[500px] overflow-auto pr-1">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="font-display text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-fuchsia-400" />
+            Closet Items
+          </div>
+          <div className="mt-4 max-h-[500px] overflow-auto pr-1">
+            <div className="grid grid-cols-2 gap-3">
               {closet.map((it) => (
                 <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
               ))}
@@ -229,7 +235,7 @@ export function DemoOutfitBuilder() {
         </aside>
 
         <section className="space-y-2 sm:space-y-3">
-          {/* Name input - simplified on mobile */}
+          {/* Name input */}
           <div className="flex items-center gap-2">
             <Input 
               value={name} 
@@ -239,17 +245,19 @@ export function DemoOutfitBuilder() {
             />
           </div>
 
-          {/* Background Color Selector - always visible on mobile */}
+          {/* Background Color Selector */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-            <Palette className="h-4 w-4 text-slate-400 flex-shrink-0" />
+            <Palette className="h-4 w-4 text-fuchsia-400 flex-shrink-0" />
             {BACKGROUND_COLORS.map((color) => (
               <button
                 key={color.id}
                 type="button"
                 onClick={() => setBgColor(color.value)}
                 className={cn(
-                  "h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 transition-all flex-shrink-0",
-                  bgColor === color.value ? "border-red-500 ring-2 ring-red-200 scale-110" : "border-slate-200"
+                  "h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 transition-all duration-200 flex-shrink-0",
+                  bgColor === color.value 
+                    ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 scale-110 shadow-[0_0_15px_rgba(255,20,147,0.5)]" 
+                    : "border-fuchsia-500/30 hover:border-fuchsia-500/60"
                 )}
                 style={{ backgroundColor: color.value }}
                 title={color.label}
@@ -260,7 +268,7 @@ export function DemoOutfitBuilder() {
           {/* Board - Hochformat (Breite: 450px, Höhe: 600px = 3:4 Ratio) */}
           <div
             ref={boardRef}
-            className="relative mx-auto overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 shadow-inner"
+            className="relative mx-auto overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)]"
             style={{ 
               backgroundColor: bgColor, 
               touchAction: "none",
@@ -292,24 +300,24 @@ export function DemoOutfitBuilder() {
           <div className="glass-card rounded-2xl sm:rounded-3xl p-2 sm:p-4">
             <div className="flex items-center justify-between gap-2">
               {/* Selected info */}
-              <div className="text-xs sm:text-sm text-slate-600 min-w-0 flex-shrink">
+              <div className="text-xs sm:text-sm text-white/60 min-w-0 flex-shrink">
                 {selectedItem ? (
-                  <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+                  <span className="text-xs px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
                     {Math.round(selectedItem.scale * 100)}% · {selectedItem.rotation}°
                   </span>
                 ) : (
-                  <span className="text-slate-400">Item auswählen</span>
+                  <span className="text-white/40">Item auswählen</span>
                 )}
               </div>
 
-              {/* Control buttons - always visible */}
+              {/* Control buttons */}
               <div className="flex items-center gap-1">
                 {/* Size Controls */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full min-w-0 min-h-0"
                   disabled={!selectedItem}
                   onClick={() =>
                     updateSelected({ scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.15) })
@@ -322,7 +330,7 @@ export function DemoOutfitBuilder() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full min-w-0 min-h-0"
                   disabled={!selectedItem}
                   onClick={() =>
                     updateSelected({ scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.15) })
@@ -337,7 +345,7 @@ export function DemoOutfitBuilder() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full"
+                  className="h-9 w-9 sm:h-10 sm:w-10 p-0 rounded-full min-w-0 min-h-0"
                   disabled={!selectedItem}
                   onClick={() => updateSelected({ rotation: ((selectedItem?.rotation ?? 0) + 15) % 360 })}
                   title="Drehen"
@@ -371,16 +379,16 @@ function ClosetTile({ item, onAdd }: { item: DemoClothingItem; onAdd: () => void
     <button
       type="button"
       onClick={onAdd}
-      className="glass-card shine w-full rounded-2xl p-2 text-left transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+      className="glass-card shine w-full rounded-2xl p-2 text-left transition-all duration-200 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(255,20,147,0.3)] active:scale-[0.97]"
       title={`${item.category}${item.color ? ` · ${item.color}` : ""} – Tippen zum Hinzufügen`}
     >
-      <div className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-[repeating-conic-gradient(#f1f5f9_0%_25%,#fff_0%_50%)] bg-[length:12px_12px] shadow-sm">
+      <div className="aspect-square overflow-hidden rounded-xl border-2 border-fuchsia-500/20 bg-[repeating-conic-gradient(#1a1a2e_0%_25%,#0a0a15_0%_50%)] bg-[length:12px_12px] shadow-[inset_0_0_15px_rgba(0,0,0,0.5)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.imageDataUrl} alt={item.category} className="h-full w-full object-contain" />
+        <img src={item.imageDataUrl} alt={item.category} className="h-full w-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-[11px] text-slate-600 capitalize">{item.category}</span>
-        <span className="text-[10px] text-red-500">+ Add</span>
+        <span className="text-[11px] text-white/60 capitalize font-medium">{item.category}</span>
+        <span className="text-[10px] text-fuchsia-400 font-bold uppercase">+ Add</span>
       </div>
     </button>
   );
@@ -549,13 +557,16 @@ function PlacedItemView({
             src={item.imageDataUrl} 
             alt="" 
             className="h-full w-full object-contain pointer-events-none" 
-            style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" }}
+            style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
             draggable={false}
           />
           {selected && (
             <div 
-              className="absolute inset-0 rounded-lg ring-2 ring-red-400 ring-offset-0 pointer-events-none" 
-              style={{ background: "radial-gradient(circle, rgba(220,38,38,0.1) 0%, transparent 70%)" }} 
+              className="absolute inset-0 rounded-lg ring-2 ring-fuchsia-500 ring-offset-0 pointer-events-none" 
+              style={{ 
+                background: "radial-gradient(circle, rgba(255,20,147,0.15) 0%, transparent 70%)",
+                boxShadow: "0 0 20px rgba(255,20,147,0.4)"
+              }} 
             />
           )}
         </div>

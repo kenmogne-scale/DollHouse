@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Download, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Download, ArrowLeft, Pencil, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 
@@ -70,7 +70,7 @@ export function StoreDetailClient({
         scale: 2, // Higher resolution
         useCORS: true,
         allowTaint: true,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#0a0a0a",
         logging: false,
       });
 
@@ -86,12 +86,12 @@ export function StoreDetailClient({
 
       // Add title
       pdf.setFontSize(24);
-      pdf.setTextColor(30, 41, 59); // slate-800
+      pdf.setTextColor(255, 20, 147); // Fuchsia
       pdf.text(outfit.name, pageWidth / 2, 20, { align: "center" });
 
       // Add subtitle
       pdf.setFontSize(10);
-      pdf.setTextColor(100, 116, 139); // slate-500
+      pdf.setTextColor(150, 150, 150);
       pdf.text("Created with DollCloset ✦", pageWidth / 2, 28, { align: "center" });
 
       // Calculate image dimensions to fit on page (maintain aspect ratio)
@@ -108,7 +108,7 @@ export function StoreDetailClient({
 
       // Add date at bottom
       pdf.setFontSize(8);
-      pdf.setTextColor(148, 163, 184); // slate-400
+      pdf.setTextColor(100, 100, 100);
       pdf.text(
         `Exportiert am ${new Date().toLocaleDateString("de-DE")}`,
         pageWidth / 2,
@@ -132,13 +132,16 @@ export function StoreDetailClient({
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-semibold text-slate-800">
-            {outfit.name} ✦
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">Read-only Preview</p>
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5 text-fuchsia-400" />
+            <h1 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-wider text-white">
+              {outfit.name}
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-white/50">Read-only Preview</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button asChild variant="ghost" size="sm" className="gap-1.5">
+          <Button asChild variant="ghost" size="sm" className="gap-1.5 normal-case">
             <Link href="/store">
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Zurück</span>
@@ -167,7 +170,7 @@ export function StoreDetailClient({
               type="submit"
               variant="ghost"
               size="sm"
-              className="gap-1.5 text-red-600 hover:bg-red-50"
+              className="gap-1.5 text-fuchsia-400 hover:bg-fuchsia-500/20"
             >
               <Trash2 className="h-4 w-4" />
               <span className="hidden sm:inline">Löschen</span>
@@ -179,7 +182,7 @@ export function StoreDetailClient({
       {/* Collage Preview Board - Hochformat (3:4) */}
       <div
         ref={boardRef}
-        className="relative mx-auto w-full max-w-[450px] overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-inner"
+        className="relative mx-auto w-full max-w-[450px] overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-fuchsia-500/30 bg-black shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)]"
         style={{ aspectRatio: "3/4" }}
       >
         {placed.map((it, idx) => (
@@ -202,17 +205,16 @@ export function StoreDetailClient({
               alt=""
               className="h-full w-full object-contain"
               crossOrigin="anonymous"
-              style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" }}
+              style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
             />
           </div>
         ))}
       </div>
 
       {/* Export hint */}
-      <div className="text-center text-xs text-slate-400">
+      <div className="text-center text-xs text-white/30">
         Tipp: Klicke auf PDF um deine Collage zu exportieren und zu teilen.
       </div>
     </div>
   );
 }
-

@@ -45,10 +45,10 @@ export function DollAvatar({ className = "" }: { className?: string }) {
       {/* Nose */}
       <path d="M100 72 L98 82 Q100 85 102 82 L100 72" fill="url(#skinGradient)" stroke="#D4A574" strokeWidth="0.5" />
       
-      {/* Lips - Full glossy lips */}
-      <path d="M88 95 Q100 88 112 95" fill="#E85A71" />
-      <path d="M88 95 Q100 102 112 95" fill="#C94A5E" />
-      <ellipse cx="100" cy="93" rx="8" ry="3" fill="#FFB6C1" opacity="0.5" />
+      {/* Lips - Full glossy lips - Hot Pink */}
+      <path d="M88 95 Q100 88 112 95" fill="#FF1493" />
+      <path d="M88 95 Q100 102 112 95" fill="#C71585" />
+      <ellipse cx="100" cy="93" rx="8" ry="3" fill="#FF69B4" opacity="0.5" />
       
       {/* Neck */}
       <path d="M85 110 L85 140 Q100 145 115 140 L115 110" fill="url(#skinGradient)" />
@@ -150,11 +150,11 @@ export function DollAvatarBlonde({ className = "" }: { className?: string }) {
       {/* Face */}
       <ellipse cx="100" cy="70" rx="38" ry="45" fill="url(#skinGradientLight)" />
       
-      {/* Eyes - Big doll eyes - Blue */}
+      {/* Eyes - Big doll eyes - Purple */}
       <ellipse cx="82" cy="65" rx="12" ry="14" fill="white" />
       <ellipse cx="118" cy="65" rx="12" ry="14" fill="white" />
-      <ellipse cx="82" cy="67" rx="8" ry="10" fill="#4A90D9" />
-      <ellipse cx="118" cy="67" rx="8" ry="10" fill="#4A90D9" />
+      <ellipse cx="82" cy="67" rx="8" ry="10" fill="#9B30FF" />
+      <ellipse cx="118" cy="67" rx="8" ry="10" fill="#9B30FF" />
       <ellipse cx="84" cy="65" rx="3" ry="4" fill="white" />
       <ellipse cx="120" cy="65" rx="3" ry="4" fill="white" />
       
@@ -171,10 +171,10 @@ export function DollAvatarBlonde({ className = "" }: { className?: string }) {
       {/* Nose */}
       <path d="M100 72 L98 82 Q100 85 102 82 L100 72" fill="url(#skinGradientLight)" stroke="#E8C4B0" strokeWidth="0.5" />
       
-      {/* Lips - Full glossy lips - Pink */}
-      <path d="M88 95 Q100 88 112 95" fill="#FF69B4" />
-      <path d="M88 95 Q100 102 112 95" fill="#DB4D8A" />
-      <ellipse cx="100" cy="93" rx="8" ry="3" fill="#FFB6C1" opacity="0.6" />
+      {/* Lips - Full glossy lips - Hot Pink */}
+      <path d="M88 95 Q100 88 112 95" fill="#FF1493" />
+      <path d="M88 95 Q100 102 112 95" fill="#C71585" />
+      <ellipse cx="100" cy="93" rx="8" ry="3" fill="#FF69B4" opacity="0.6" />
       
       {/* Neck */}
       <path d="M85 110 L85 140 Q100 145 115 140 L115 110" fill="url(#skinGradientLight)" />
@@ -264,14 +264,14 @@ export function DollAvatarSelector({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs text-slate-500">Avatar:</span>
+      <span className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Avatar:</span>
       <button
         type="button"
         onClick={() => onSelect("none")}
-        className={`h-8 px-3 rounded-full text-xs font-medium transition-all ${
+        className={`h-8 px-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
           selected === "none"
-            ? "bg-slate-800 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-[0_0_15px_rgba(255,20,147,0.4)]"
+            : "bg-black/50 text-white/60 hover:bg-fuchsia-500/20 hover:text-white/80 border border-fuchsia-500/30"
         }`}
       >
         Aus
@@ -279,10 +279,10 @@ export function DollAvatarSelector({
       <button
         type="button"
         onClick={() => onSelect("brunette")}
-        className={`h-8 px-3 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+        className={`h-8 px-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
           selected === "brunette"
-            ? "bg-amber-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-gradient-to-r from-amber-900 to-amber-950 text-white shadow-[0_0_15px_rgba(180,83,9,0.4)]"
+            : "bg-black/50 text-white/60 hover:bg-fuchsia-500/20 hover:text-white/80 border border-fuchsia-500/30"
         }`}
       >
         <span className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-900 to-amber-950" />
@@ -291,10 +291,10 @@ export function DollAvatarSelector({
       <button
         type="button"
         onClick={() => onSelect("blonde")}
-        className={`h-8 px-3 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+        className={`h-8 px-3 rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${
           selected === "blonde"
-            ? "bg-amber-400 text-amber-900"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-gradient-to-r from-yellow-300 to-amber-400 text-amber-900 shadow-[0_0_15px_rgba(251,191,36,0.4)]"
+            : "bg-black/50 text-white/60 hover:bg-fuchsia-500/20 hover:text-white/80 border border-fuchsia-500/30"
         }`}
       >
         <span className="w-3 h-3 rounded-full bg-gradient-to-br from-yellow-300 to-amber-400" />
@@ -303,5 +303,3 @@ export function DollAvatarSelector({
     </div>
   );
 }
-
-

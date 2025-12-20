@@ -1,24 +1,26 @@
 import type { Metadata } from "next";
-import { Quicksand, Fredoka } from "next/font/google";
+import { Outfit, Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/Toaster";
 import { PageTransition } from "@/components/motion/PageTransition";
 
-const fontSans = Quicksand({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const fontDisplay = Fredoka({
+// Display Font - Bold, edgy, mit Attitude
+const fontDisplay = Outfit({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+// Body Font - Rund, leicht verspielt, clean
+const fontSans = Sora({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "DollCloset",
-  description: "Turn your real closet into a digital doll store.",
+  title: "DollCloset ✦",
+  description: "Turn your real closet into a digital doll store. Y2K Vibes only.",
 };
 
 export default function RootLayout({
@@ -29,14 +31,41 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body
-        className={`${fontSans.variable} ${fontDisplay.variable} min-h-dvh bg-[radial-gradient(ellipse_800px_600px_at_20%_10%,rgba(220,38,38,0.06),transparent_60%),radial-gradient(ellipse_600px_500px_at_85%_15%,rgba(251,113,133,0.08),transparent_55%),radial-gradient(ellipse_700px_700px_at_55%_95%,rgba(220,38,38,0.05),transparent_60%),linear-gradient(180deg,#ffffff_0%,#fafafa_100%)] text-slate-900 antialiased`}
+        className={`${fontSans.variable} ${fontDisplay.variable} min-h-dvh bg-[var(--bg)] text-white antialiased`}
+        style={{
+          background: `
+            radial-gradient(ellipse 900px 700px at 15% 5%, rgba(255, 20, 147, 0.15), transparent 60%),
+            radial-gradient(ellipse 700px 600px at 85% 10%, rgba(155, 48, 255, 0.12), transparent 55%),
+            radial-gradient(ellipse 800px 800px at 50% 100%, rgba(255, 0, 127, 0.1), transparent 60%),
+            radial-gradient(ellipse 400px 400px at 90% 80%, rgba(155, 48, 255, 0.08), transparent 50%),
+            linear-gradient(180deg, #0a0a0a 0%, #0d0510 30%, #100818 60%, #0a0a0a 100%)
+          `,
+        }}
       >
-        {/* Y2K decorative elements */}
+        {/* Y2K Decorative Elements - Bratz Style */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute -left-20 top-40 h-64 w-64 rounded-full bg-gradient-to-br from-red-100/40 to-transparent blur-3xl" />
-          <div className="absolute -right-20 top-1/3 h-48 w-48 rounded-full bg-gradient-to-bl from-rose-100/30 to-transparent blur-3xl" />
-          <div className="absolute bottom-20 left-1/4 h-32 w-32 rounded-full bg-gradient-to-tr from-red-50/50 to-transparent blur-2xl" />
+          {/* Large fuchsia glow */}
+          <div className="absolute -left-32 top-20 h-96 w-96 rounded-full bg-gradient-to-br from-fuchsia-500/20 to-transparent blur-3xl" />
+          {/* Violet accent */}
+          <div className="absolute -right-20 top-1/4 h-72 w-72 rounded-full bg-gradient-to-bl from-violet-500/15 to-transparent blur-3xl" />
+          {/* Hot pink bottom */}
+          <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-gradient-to-tr from-pink-500/10 to-transparent blur-3xl" />
+          {/* Chrome accent */}
+          <div className="absolute right-1/4 top-3/4 h-40 w-40 rounded-full bg-gradient-to-tl from-white/5 to-transparent blur-2xl" />
         </div>
+        
+        {/* Grid pattern overlay */}
+        <div 
+          className="pointer-events-none fixed inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255, 20, 147, 0.5) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 20, 147, 0.5) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+          }}
+        />
+        
         <div className="relative z-10">
           <PageTransition>{children}</PageTransition>
         </div>

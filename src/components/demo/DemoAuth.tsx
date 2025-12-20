@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { DEMO_COOKIE, DEMO_EMAIL_COOKIE } from "@/lib/demo/constants";
@@ -31,15 +32,16 @@ export function DemoAuth() {
   }
 
   return (
-    <div className="glass-card bubble-ring mx-auto w-full max-w-md rounded-3xl p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 p-1">
+    <div className="glass-card bubble-ring mx-auto w-full max-w-md rounded-3xl p-6 sm:p-8">
+      {/* Mode Toggle */}
+      <div className="mb-6 flex items-center gap-1 rounded-full border-2 border-fuchsia-500/30 bg-black/50 p-1">
         <button
           type="button"
           onClick={() => setMode("login")}
-          className={`h-10 flex-1 rounded-full text-sm font-medium transition-all ${
+          className={`h-11 flex-1 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
             mode === "login"
-              ? "bg-white text-slate-800 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-[0_0_20px_rgba(255,20,147,0.4)]"
+              : "text-white/50 hover:text-white/80"
           }`}
         >
           Login
@@ -47,26 +49,29 @@ export function DemoAuth() {
         <button
           type="button"
           onClick={() => setMode("register")}
-          className={`h-10 flex-1 rounded-full text-sm font-medium transition-all ${
+          className={`h-11 flex-1 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
             mode === "register"
-              ? "bg-white text-slate-800 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-[0_0_20px_rgba(255,20,147,0.4)]"
+              : "text-white/50 hover:text-white/80"
           }`}
         >
           Register
         </button>
       </div>
 
-      <h1 className="font-display text-2xl font-semibold tracking-tight text-slate-800">
-        {mode === "login" ? "Demo Login ✦" : "Demo Register ✦"}
-      </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="h-5 w-5 text-fuchsia-400" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-wider text-white">
+          {mode === "login" ? "Demo Login" : "Demo Register"}
+        </h1>
+      </div>
+      <p className="text-sm text-white/50 mb-6">
         Kein Supabase, kein Hosting. Alles bleibt lokal in deinem Browser.
       </p>
 
-      <form onSubmit={onSubmit} className="mt-5 space-y-3">
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">E-Mail (Demo)</label>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">E-Mail (Demo)</label>
           <Input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -76,19 +81,19 @@ export function DemoAuth() {
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Passwort</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Passwort</label>
           <Input
             type="password"
             placeholder="(ignored im Demo Mode)"
             defaultValue="password"
           />
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-white/40">
             Demo Mode: Passwort wird nicht geprüft.
           </p>
         </div>
 
-        <Button type="submit" variant="primary" size="lg" className="w-full">
+        <Button type="submit" variant="primary" size="lg" className="w-full mt-2">
           Continue (Demo) ✦
         </Button>
       </form>

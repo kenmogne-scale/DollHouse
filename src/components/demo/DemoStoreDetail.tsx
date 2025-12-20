@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Download, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Download, ArrowLeft, Pencil, Trash2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { loadJson, saveJson } from "@/lib/demo/storage";
@@ -28,7 +28,7 @@ export function DemoStoreDetail() {
 
   if (!outfit) {
     return (
-      <div className="glass-card rounded-3xl p-6 text-sm text-slate-500">
+      <div className="glass-card rounded-3xl p-6 text-sm text-white/50">
         Outfit nicht gefunden.
       </div>
     );
@@ -64,7 +64,7 @@ export function DemoStoreDetail() {
         scale: 2, // Higher resolution
         useCORS: true,
         allowTaint: true,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#0a0a0a",
       });
 
       // Create PDF (A4 format)
@@ -79,12 +79,12 @@ export function DemoStoreDetail() {
       
       // Add title
       pdf.setFontSize(24);
-      pdf.setTextColor(30, 41, 59); // slate-800
+      pdf.setTextColor(255, 20, 147); // Fuchsia
       pdf.text(outfit.name, pageWidth / 2, 20, { align: "center" });
       
       // Add subtitle
       pdf.setFontSize(10);
-      pdf.setTextColor(100, 116, 139); // slate-500
+      pdf.setTextColor(150, 150, 150);
       pdf.text("Created with DollCloset ✦", pageWidth / 2, 28, { align: "center" });
 
       // Calculate image dimensions to fit on page
@@ -101,7 +101,7 @@ export function DemoStoreDetail() {
 
       // Add date at bottom
       pdf.setFontSize(8);
-      pdf.setTextColor(148, 163, 184); // slate-400
+      pdf.setTextColor(100, 100, 100);
       pdf.text(
         `Exportiert am ${new Date().toLocaleDateString("de-DE")}`,
         pageWidth / 2,
@@ -125,11 +125,14 @@ export function DemoStoreDetail() {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-xl sm:text-2xl font-semibold text-slate-800">{outfit.name} ✦</h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">Demo Preview</p>
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-5 w-5 text-fuchsia-400" />
+            <h1 className="font-display text-xl sm:text-2xl font-bold uppercase tracking-wider text-white">{outfit.name}</h1>
+          </div>
+          <p className="text-xs sm:text-sm text-white/50">Demo Preview</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Button asChild variant="ghost" size="sm" className="gap-1.5">
+          <Button asChild variant="ghost" size="sm" className="gap-1.5 normal-case">
             <Link href="/store">
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Zurück</span>
@@ -152,7 +155,7 @@ export function DemoStoreDetail() {
               <span className="hidden sm:inline">Bearbeiten</span>
             </Link>
           </Button>
-          <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-red-600 hover:bg-red-50" onClick={del}>
+          <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-fuchsia-400 hover:bg-fuchsia-500/20" onClick={del}>
             <Trash2 className="h-4 w-4" />
             <span className="hidden sm:inline">Löschen</span>
           </Button>
@@ -162,7 +165,7 @@ export function DemoStoreDetail() {
       {/* Collage Preview Board - Hochformat (3:4) */}
       <div 
         ref={boardRef}
-        className="relative mx-auto w-full max-w-[450px] overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-inner"
+        className="relative mx-auto w-full max-w-[450px] overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-fuchsia-500/30 bg-black shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)]"
         style={{ aspectRatio: "3/4" }}
       >
         {placed.map((it) =>
@@ -185,7 +188,7 @@ export function DemoStoreDetail() {
                 src={it.img} 
                 alt="" 
                 className="h-full w-full object-contain" 
-                style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" }}
+                style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
               />
             </div>
           ) : null,
@@ -193,7 +196,7 @@ export function DemoStoreDetail() {
       </div>
 
       {/* Export hint */}
-      <div className="text-center text-xs text-slate-400">
+      <div className="text-center text-xs text-white/30">
         Tipp: Klicke auf PDF um deine Collage zu exportieren und zu teilen.
       </div>
     </div>

@@ -25,17 +25,27 @@ export function Button({
   return (
     <Comp
       className={cn(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-all duration-150 will-change-transform",
-        "active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-        size === "sm" && "h-9 px-4 text-sm",
-        size === "md" && "h-11 px-5 text-sm",
-        size === "lg" && "h-12 px-6 text-base",
+        // Base styles
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold uppercase tracking-wider transition-all duration-200 will-change-transform",
+        "active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-black",
+        
+        // Sizes
+        size === "sm" && "h-9 px-4 text-xs",
+        size === "md" && "h-11 px-6 text-sm",
+        size === "lg" && "h-13 px-8 text-base",
+        
+        // Primary - Glossy Hot Pink
         variant === "primary" &&
-          "shine bg-gradient-to-b from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-red-500/30 border border-red-400/50",
+          "glossy-btn shine text-white hover:-translate-y-0.5",
+        
+        // Secondary - Chrome/Silver
         variant === "secondary" &&
-          "chrome-btn text-slate-700 hover:-translate-y-0.5 hover:text-slate-900",
+          "chrome-btn hover:-translate-y-0.5",
+        
+        // Ghost - Transparent with border
         variant === "ghost" &&
-          "border border-slate-200 bg-white/60 text-slate-600 hover:bg-white hover:text-slate-900 hover:border-slate-300",
+          "border-2 border-fuchsia-500/30 bg-transparent text-fuchsia-300 hover:bg-fuchsia-500/10 hover:border-fuchsia-500/50 hover:text-fuchsia-200 hover:shadow-[0_0_20px_rgba(255,20,147,0.2)]",
+        
         className,
       )}
       {...props}

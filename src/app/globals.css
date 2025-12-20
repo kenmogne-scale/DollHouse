@@ -1,18 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #ffffff;
-  --fg: #1a1a2e;
-  --card: rgba(255, 255, 255, 0.92);
-  --card-border: rgba(200, 40, 60, 0.18);
-  --muted: rgba(26, 26, 46, 0.72);
-  --muted-2: rgba(26, 26, 46, 0.55);
-  --ring: rgba(220, 38, 38, 0.45);
-  --shadow: 0 8px 40px rgba(220, 38, 38, 0.08), 0 2px 12px rgba(0, 0, 0, 0.06);
-  --accent: #dc2626;
-  --accent-light: #fef2f2;
-  --accent-hover: #b91c1c;
-  --chrome: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 25%, #f0f0f0 50%, #d8d8d8 75%, #f0f0f0 100%);
+  /* === BRATZ Y2K FARBWELT === */
+  --bg: #0a0a0a;
+  --bg-gradient: linear-gradient(145deg, #0a0a0a 0%, #1a0a1a 25%, #0d0d15 50%, #150a15 75%, #0a0a0a 100%);
+  --fg: #ffffff;
+  
+  /* Hauptfarben */
+  --fuchsia: #ff1493;
+  --fuchsia-light: #ff69b4;
+  --fuchsia-dark: #c71585;
+  --violet: #9b30ff;
+  --violet-light: #bf5fff;
+  --violet-dark: #7b22cc;
+  --hot-pink: #ff007f;
+  --magenta: #e100ff;
+  
+  /* Chrome/Silver Akzente */
+  --chrome: linear-gradient(135deg, #f8f8f8 0%, #c0c0c0 25%, #e8e8e8 50%, #a0a0a0 75%, #d0d0d0 100%);
+  --chrome-text: linear-gradient(135deg, #ffffff 0%, #c0c0c0 40%, #ffffff 60%, #a0a0a0 100%);
+  --silver: #c0c0c0;
+  
+  /* Cards & UI */
+  --card: rgba(20, 10, 25, 0.85);
+  --card-border: rgba(255, 20, 147, 0.35);
+  --card-border-hover: rgba(255, 20, 147, 0.6);
+  --muted: rgba(255, 255, 255, 0.75);
+  --muted-2: rgba(255, 255, 255, 0.5);
+  
+  /* Glow & Shadows */
+  --ring: rgba(255, 20, 147, 0.6);
+  --glow-fuchsia: 0 0 20px rgba(255, 20, 147, 0.5), 0 0 40px rgba(255, 20, 147, 0.3);
+  --glow-violet: 0 0 20px rgba(155, 48, 255, 0.5), 0 0 40px rgba(155, 48, 255, 0.3);
+  --shadow-brutal: 0 8px 32px rgba(255, 20, 147, 0.25), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-glossy: 
+    0 12px 40px rgba(255, 20, 147, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  
+  /* Accent (primär) */
+  --accent: var(--fuchsia);
+  --accent-light: var(--fuchsia-light);
+  --accent-hover: var(--fuchsia-dark);
 }
 
 @theme inline {
@@ -27,20 +56,19 @@ body {
     Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
-/* --- DollCloset: Y2K bubble primitives --- */
+/* === BRATZ Y2K PRIMITIVES === */
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
   }
   
+  html {
+    overscroll-behavior: none;
+  }
+  
   /* Safe area for iPhone notch/home indicator */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  
-  /* Prevent pull-to-refresh on mobile */
-  html {
-    overscroll-behavior: none;
   }
   
   /* Better touch targets on mobile */
@@ -50,6 +78,23 @@ body {
       min-width: 44px;
     }
   }
+  
+  /* Custom scrollbar - Y2K style */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(20, 10, 25, 0.5);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--fuchsia) 0%, var(--violet) 100%);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--fuchsia-light) 0%, var(--violet-light) 100%);
+  }
 }
 
 @layer utilities {
@@ -57,27 +102,30 @@ body {
     font-family: var(--font-display), var(--font-sans), ui-sans-serif, system-ui;
   }
 
-  /* Y2K glossy card with chrome-like border */
+  /* Y2K Glossy Card */
   .glass-card {
     background: var(--card);
-    border: 1.5px solid var(--card-border);
-    box-shadow: 
-      var(--shadow),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(12px);
+    border: 2px solid var(--card-border);
+    box-shadow: var(--shadow-glossy);
+    backdrop-filter: blur(16px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .glass-card:hover {
+    border-color: var(--card-border-hover);
+    box-shadow: var(--glow-fuchsia), var(--shadow-glossy);
   }
 
-  /* Y2K bubble ring with red accent glow */
+  /* Y2K Bubble Ring mit Fuchsia Glow */
   .bubble-ring {
     box-shadow:
-      0 0 0 1px rgba(220, 38, 38, 0.15),
-      0 0 0 4px rgba(220, 38, 38, 0.08),
-      0 4px 24px rgba(220, 38, 38, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      0 0 0 2px rgba(255, 20, 147, 0.4),
+      0 0 0 6px rgba(255, 20, 147, 0.15),
+      0 8px 32px rgba(255, 20, 147, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 
-  /* Y2K chrome shine effect */
+  /* Glossy Shine Effect */
   .shine {
     position: relative;
     overflow: hidden;
@@ -85,57 +133,170 @@ body {
   .shine::before {
     content: "";
     position: absolute;
-    inset: -40%;
-    transform: translateX(-60%) rotate(18deg);
+    inset: -50%;
+    transform: translateX(-70%) rotate(25deg);
     background: linear-gradient(
       90deg,
       transparent,
-      rgba(255, 255, 255, 0.4),
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0.4),
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.3),
+      rgba(255, 255, 255, 0.1),
       transparent
     );
-    transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: transform 800ms cubic-bezier(0.2, 0.8, 0.2, 1);
     pointer-events: none;
   }
   .shine:hover::before {
-    transform: translateX(55%) rotate(18deg);
+    transform: translateX(70%) rotate(25deg);
   }
 
-  /* Y2K star decoration */
+  /* Y2K Star Twinkle */
   .y2k-star {
     position: relative;
   }
   .y2k-star::after {
     content: "✦";
     position: absolute;
-    top: -4px;
-    right: -8px;
-    font-size: 10px;
-    color: var(--accent);
-    animation: twinkle 2s ease-in-out infinite;
+    top: -6px;
+    right: -10px;
+    font-size: 12px;
+    color: var(--fuchsia);
+    animation: twinkle 1.5s ease-in-out infinite;
+    text-shadow: 0 0 10px var(--fuchsia);
   }
   
   @keyframes twinkle {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
+    0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    50% { opacity: 0.6; transform: scale(0.85) rotate(15deg); }
   }
 
-  /* Y2K gradient text */
+  /* Bratz Gradient Text */
   .y2k-gradient-text {
-    background: linear-gradient(135deg, #dc2626 0%, #f87171 50%, #dc2626 100%);
+    background: linear-gradient(135deg, var(--fuchsia) 0%, var(--violet) 50%, var(--hot-pink) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: none;
+  }
+  
+  /* Chrome/Silver Text */
+  .chrome-text {
+    background: var(--chrome-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
 
-  /* Chrome button effect */
+  /* Chrome Button Effect */
   .chrome-btn {
     background: var(--chrome);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #1a1a2e;
     box-shadow: 
-      0 2px 4px rgba(0, 0, 0, 0.06),
+      0 4px 12px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  }
+  
+  .chrome-btn:hover {
+    box-shadow: 
+      0 6px 20px rgba(0, 0, 0, 0.4),
+      0 0 20px rgba(255, 255, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  /* Glossy Primary Button */
+  .glossy-btn {
+    background: linear-gradient(180deg, var(--fuchsia-light) 0%, var(--fuchsia) 50%, var(--fuchsia-dark) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      var(--glow-fuchsia),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  
+  .glossy-btn:hover {
+    background: linear-gradient(180deg, var(--hot-pink) 0%, var(--fuchsia-light) 50%, var(--fuchsia) 100%);
+    box-shadow: 
+      0 0 30px rgba(255, 20, 147, 0.7),
+      0 0 60px rgba(255, 20, 147, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  /* Sticker Badge */
+  .sticker-badge {
+    background: linear-gradient(135deg, var(--fuchsia) 0%, var(--violet) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: white;
+    box-shadow: 
+      0 4px 12px rgba(255, 20, 147, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Glow Hover Effect */
+  .glow-hover {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .glow-hover:hover {
+    box-shadow: var(--glow-fuchsia);
+    transform: scale(1.03);
+  }
+
+  /* Outline Glow */
+  .outline-glow {
+    position: relative;
+  }
+  .outline-glow::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--fuchsia) 0%, var(--violet) 50%, var(--hot-pink) 100%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .outline-glow:hover::after {
+    opacity: 0.6;
+    filter: blur(8px);
+  }
+  
+  /* Y2K Heart Icon Animation */
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.1); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.05); }
+  }
+  
+  .heartbeat {
+    animation: heartbeat 1.2s ease-in-out infinite;
+  }
+  
+  /* Sparkle Animation */
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  }
+  
+  /* Neon Text Glow */
+  .neon-text {
+    text-shadow: 
+      0 0 5px var(--fuchsia),
+      0 0 10px var(--fuchsia),
+      0 0 20px var(--fuchsia),
+      0 0 40px var(--violet);
   }
 }

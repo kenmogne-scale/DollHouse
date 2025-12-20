@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
@@ -31,7 +31,7 @@ export default async function StorePage() {
 
   if (!user) {
     return (
-      <div className="glass-card rounded-3xl p-6 text-sm text-slate-500">
+      <div className="glass-card rounded-3xl p-6 text-sm text-white/50">
         Nicht eingeloggt.
       </div>
     );
@@ -44,7 +44,7 @@ export default async function StorePage() {
 
   if (outfitsRes.error) {
     return (
-      <div className="glass-card rounded-3xl p-6 text-sm text-slate-500">
+      <div className="glass-card rounded-3xl p-6 text-sm text-white/50">
         Fehler beim Laden: {outfitsRes.error.message}
       </div>
     );
@@ -103,8 +103,11 @@ export default async function StorePage() {
     <div className="space-y-6">
       {/* Pinterest-style Header */}
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-slate-900">Meine Outfits</h1>
-        <Button asChild variant="primary" className="gap-2 rounded-full px-5">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-fuchsia-400" />
+          <h1 className="font-display text-2xl font-bold uppercase tracking-wider text-white">Meine Outfits</h1>
+        </div>
+        <Button asChild variant="primary" className="gap-2">
           <Link href="/outfits/builder">
             <Plus className="h-4 w-4" />
             Erstellen
@@ -114,14 +117,14 @@ export default async function StorePage() {
 
       {outfits.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 to-pink-100">
-            <Plus className="h-8 w-8 text-rose-400" />
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 border-2 border-fuchsia-500/30 shadow-[0_0_30px_rgba(255,20,147,0.2)]">
+            <Plus className="h-8 w-8 text-fuchsia-400" />
           </div>
-          <h2 className="text-lg font-semibold text-slate-800">Noch keine Outfits</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="font-display text-lg font-bold uppercase tracking-wider text-white">Noch keine Outfits</h2>
+          <p className="mt-2 text-sm text-white/50">
             Erstelle deine erste Collage im Builder
           </p>
-          <Button asChild variant="primary" className="mt-4 gap-2 rounded-full">
+          <Button asChild variant="primary" className="mt-6 gap-2">
             <Link href="/outfits/builder">
               <Plus className="h-4 w-4" />
               Outfit erstellen
@@ -143,4 +146,3 @@ export default async function StorePage() {
     </div>
   );
 }
-

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
@@ -97,23 +97,23 @@ export function UploadItemModal({
 
   return (
     <Modal open={open} onClose={onClose} title="Upload Item ✦">
-      <form ref={formRef} onSubmit={handleSubmit} className="space-y-3">
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Bild</label>
-          <Input ref={fileRef} name="image" type="file" accept="image/*" required disabled={busy} />
-          <p className="text-[11px] text-slate-400">
-            <Sparkles className="inline h-3 w-3 mr-1" />
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Bild</label>
+          <Input ref={fileRef} name="image" type="file" accept="image/*" required disabled={busy} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:uppercase file:bg-fuchsia-500/20 file:text-fuchsia-400 hover:file:bg-fuchsia-500/30 file:cursor-pointer" />
+          <p className="text-[11px] text-white/40 flex items-center gap-1.5">
+            <Sparkles className="inline h-3 w-3 text-fuchsia-400" />
             Der Hintergrund wird automatisch entfernt (max. 10MB).
           </p>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Kategorie</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Kategorie</label>
           <select
             name="category"
             required
             disabled={busy}
-            className="h-11 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] shadow-sm disabled:opacity-50"
+            className="h-12 w-full rounded-2xl border-2 border-fuchsia-500/30 bg-black/50 px-4 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500/50 shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] disabled:opacity-50 cursor-pointer"
             defaultValue="tops"
           >
             <option value="tops">Tops</option>
@@ -123,8 +123,8 @@ export function UploadItemModal({
           </select>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Farbe (optional)</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Farbe (optional)</label>
           <Input
             name="color"
             placeholder="z.B. pink, black, teal…"
@@ -134,14 +134,14 @@ export function UploadItemModal({
         </div>
 
         {busy && (
-          <div className="space-y-2">
+          <div className="space-y-3 p-4 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-500/30">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-600">{status}</span>
-              <span className="text-slate-400">{progress}%</span>
+              <span className="text-fuchsia-300 font-medium">{status}</span>
+              <span className="text-fuchsia-400 font-bold">{progress}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-black/50">
               <div
-                className="h-full bg-gradient-to-r from-red-400 to-red-500 transition-all duration-300"
+                className="h-full bg-gradient-to-r from-fuchsia-500 via-violet-500 to-fuchsia-500 transition-all duration-300 shadow-[0_0_10px_rgba(255,20,147,0.5)]"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -156,7 +156,7 @@ export function UploadItemModal({
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
+              <Upload className="h-4 w-4" />
               Upload & Freistellen ✦
             </>
           )}

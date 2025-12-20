@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
@@ -32,15 +33,16 @@ export function AuthForm({ defaultMode = "login" }: { defaultMode?: Mode }) {
   }, [loginState?.error, registerState?.error]);
 
   return (
-    <div className="glass-card bubble-ring mx-auto w-full max-w-md rounded-3xl p-5 sm:p-6">
-      <div className="mb-5 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 p-1">
+    <div className="glass-card bubble-ring mx-auto w-full max-w-md rounded-3xl p-6 sm:p-8">
+      {/* Mode Toggle */}
+      <div className="mb-6 flex items-center gap-1 rounded-full border-2 border-fuchsia-500/30 bg-black/50 p-1">
         <button
           type="button"
           onClick={() => setMode("login")}
-          className={`h-10 flex-1 rounded-full text-sm font-medium transition-all ${
+          className={`h-11 flex-1 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
             mode === "login"
-              ? "bg-white text-slate-800 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-[0_0_20px_rgba(255,20,147,0.4)]"
+              : "text-white/50 hover:text-white/80"
           }`}
         >
           Login
@@ -48,20 +50,23 @@ export function AuthForm({ defaultMode = "login" }: { defaultMode?: Mode }) {
         <button
           type="button"
           onClick={() => setMode("register")}
-          className={`h-10 flex-1 rounded-full text-sm font-medium transition-all ${
+          className={`h-11 flex-1 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-200 ${
             mode === "register"
-              ? "bg-white text-slate-800 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-gradient-to-r from-fuchsia-500 to-violet-500 text-white shadow-[0_0_20px_rgba(255,20,147,0.4)]"
+              : "text-white/50 hover:text-white/80"
           }`}
         >
           Register
         </button>
       </div>
 
-      <h1 className="font-display text-2xl font-semibold tracking-tight text-slate-800">
-        {mode === "login" ? "Welcome back ✦" : "Get access ✦"}
-      </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="h-5 w-5 text-fuchsia-400" />
+        <h1 className="font-display text-2xl font-bold uppercase tracking-wider text-white">
+          {mode === "login" ? "Welcome Back" : "Get Access"}
+        </h1>
+      </div>
+      <p className="text-sm text-white/50 mb-6">
         {mode === "login"
           ? "Log dich ein und bau dein nächstes Outfit."
           : "Erstell deinen Account in unter einer Minute."}
@@ -69,17 +74,17 @@ export function AuthForm({ defaultMode = "login" }: { defaultMode?: Mode }) {
 
       <form
         action={mode === "login" ? loginAction : registerAction}
-        className="mt-5 space-y-3"
+        className="space-y-4"
       >
         {mode === "register" ? (
-          <div className="space-y-1.5">
-            <label className="text-xs text-slate-600 font-medium">Name</label>
+          <div className="space-y-2">
+            <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Name</label>
             <Input name="name" placeholder="z.B. Yasmin" required />
           </div>
         ) : null}
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">E-Mail</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">E-Mail</label>
           <Input
             name="email"
             type="email"
@@ -88,8 +93,8 @@ export function AuthForm({ defaultMode = "login" }: { defaultMode?: Mode }) {
           />
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs text-slate-600 font-medium">Passwort</label>
+        <div className="space-y-2">
+          <label className="text-xs text-fuchsia-400 font-bold uppercase tracking-wider">Passwort</label>
           <Input
             name="password"
             type="password"
@@ -97,7 +102,7 @@ export function AuthForm({ defaultMode = "login" }: { defaultMode?: Mode }) {
             required
             minLength={6}
           />
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-white/40">
             Mindestens 6 Zeichen.
           </p>
         </div>
@@ -115,10 +120,10 @@ function AuthSubmitButton({ mode }: { mode: Mode }) {
       type="submit"
       variant="primary"
       size="lg"
-      className="w-full"
+      className="w-full mt-2"
       disabled={pending}
     >
-      {pending ? "Bitte warten…" : mode === "login" ? "Login ✦" : "Create account ✦"}
+      {pending ? "Bitte warten…" : mode === "login" ? "Login ✦" : "Create Account ✦"}
     </Button>
   );
 }
