@@ -92,7 +92,6 @@ function OutfitPreview({
   outfit: DemoOutfit;
   itemsById: Map<string, DemoClothingItem>;
 }) {
-  // Calculate bounding box of all items to center the preview
   const placedItems = outfit.items
     .map((item) => {
       const clothing = itemsById.get(item.clothingItemId);
@@ -116,58 +115,49 @@ function OutfitPreview({
     );
   }
 
-  // Calculate bounds to scale and center items in preview
-  const itemSize = 120; // Original item size in builder
-  const minX = Math.min(...placedItems.map((i) => i.x));
-  const minY = Math.min(...placedItems.map((i) => i.y));
-  const maxX = Math.max(...placedItems.map((i) => i.x + itemSize * i.scale));
-  const maxY = Math.max(...placedItems.map((i) => i.y + itemSize * i.scale));
-  
-  const contentWidth = maxX - minX;
-  const contentHeight = maxY - minY;
-  
-  // Preview container is aspect-square, so we scale to fit
-  // We use a reference size of 200px for the preview
-  const previewSize = 200;
-  const scaleToFit = Math.min(
-    previewSize / (contentWidth || 1),
-    previewSize / (contentHeight || 1),
-    1.5 // Max scale up
-  ) * 0.8; // 80% to add some padding
-
-  const offsetX = (previewSize - contentWidth * scaleToFit) / 2 - minX * scaleToFit;
-  const offsetY = (previewSize - contentHeight * scaleToFit) / 2 - minY * scaleToFit;
+  // Builder board is 600x600, item base size is 120
+  // Convert to percentages for responsive preview
+  const boardSize = 600;
+  const itemBaseSize = 120;
 
   return (
-    <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-red-50/50 via-white to-rose-50/50 shadow-sm">
-      <div className="relative h-full w-full">
+    <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="relative w-full h-full">
         {placedItems
           .slice()
           .sort((a, b) => a.zIndex - b.zIndex)
           .map((item) => {
-            const scaledSize = itemSize * item.scale * scaleToFit;
-            const x = item.x * scaleToFit + offsetX;
-            const y = item.y * scaleToFit + offsetY;
+            // Convert positions to percentages
+            const leftPercent = (item.x / boardSize) * 100;
+            const topPercent = (item.y / boardSize) * 100;
+            const sizePercent = (itemBaseSize / boardSize) * 100;
 
             return (
               <div
                 key={item.id}
                 className="absolute"
                 style={{
-                  left: x,
-                  top: y,
-                  width: scaledSize,
-                  height: scaledSize,
-                  transform: `rotate(${item.rotation}deg)`,
-                  transformOrigin: "center",
+                  left: `${leftPercent}%`,
+                  top: `${topPercent}%`,
+                  width: `${sizePercent}%`,
+                  height: `${sizePercent}%`,
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.imageDataUrl}
-                  alt=""
-                  className="h-full w-full object-contain drop-shadow-sm"
-                />
+                <div
+                  className="w-full h-full"
+                  style={{
+                    transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
+                    transformOrigin: "center",
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.imageDataUrl}
+                    alt=""
+                    className="h-full w-full object-contain"
+                    style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))" }}
+                  />
+                </div>
               </div>
             );
           })}
