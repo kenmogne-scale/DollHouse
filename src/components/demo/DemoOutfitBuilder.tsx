@@ -400,7 +400,7 @@ export function DemoOutfitBuilder() {
       </DndContext>
 
       <div className="text-[11px] text-slate-400">
-        Demo Tipp: Für "doll store vibe" passt ein PNG mit transparentem Hintergrund am besten.
+        Demo Tipp: Für &quot;doll store vibe&quot; passt ein PNG mit transparentem Hintergrund am besten.
       </div>
     </div>
   );
