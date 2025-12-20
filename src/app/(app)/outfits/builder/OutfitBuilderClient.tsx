@@ -5,17 +5,6 @@ import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import {
-  DndContext,
-  PointerSensor,
-  TouchSensor,
-  useDraggable,
-  useDroppable,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import {
   ArrowLeft,
   Save,
   Trash2,
@@ -44,7 +33,7 @@ const BACKGROUND_COLORS = [
 
 export type ClosetItemForBuilder = {
   id: string;
-  imageUrl: string; // signed URL
+  imageUrl: string;
   category: string;
   color: string | null;
 };
@@ -72,12 +61,6 @@ export function OutfitBuilderClient({
   } | null;
 }) {
   const boardRef = React.useRef<HTMLDivElement | null>(null);
-  
-  // Touch + Pointer sensors für mobile Unterstützung
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
-  );
 
   const [name, setName] = React.useState(initialOutfit?.name ?? "Outfit 1");
   const [placed, setPlaced] = React.useState<BuilderPlacedItem[]>(
@@ -103,78 +86,6 @@ export function OutfitBuilderClient({
     if (saveState?.error) toast.error(saveState.error);
   }, [saveState?.error]);
 
-  function clampToBoard(x: number, y: number) {
-    const rect = boardRef.current?.getBoundingClientRect();
-    if (!rect) return { x, y };
-    const w = rect.width;
-    const h = rect.height;
-    // MVP: wir nehmen eine grobe Item-Size als Clamp (120x120)
-    const item = 120;
-    return {
-      x: Math.max(0, Math.min(x, w - item)),
-      y: Math.max(0, Math.min(y, h - item)),
-    };
-  }
-
-  function onDragEnd(e: DragEndEvent) {
-    const activeId = String(e.active.id);
-    const delta = e.delta;
-
-    // 1) Reposition existing placed item
-    if (activeId.startsWith("placed:")) {
-      const localId = activeId.replace("placed:", "");
-      setPlaced((prev) =>
-        prev.map((it) => {
-          if (it.localId !== localId) return it;
-          const next = clampToBoard(it.x + delta.x, it.y + delta.y);
-          return { ...it, x: next.x, y: next.y };
-        }),
-      );
-      return;
-    }
-
-    // 2) Drop from closet list onto board
-    if (!e.over || String(e.over.id) !== "board") return;
-    if (!activeId.startsWith("closet:")) return;
-
-    const clothingItemId = activeId.replace("closet:", "");
-    const src = closetItems.find((c) => c.id === clothingItemId);
-    if (!src) return;
-
-    const activator = e.activatorEvent as PointerEvent | TouchEvent;
-    let clientX: number, clientY: number;
-    
-    if ('touches' in activator) {
-      clientX = activator.touches[0]?.clientX ?? 0;
-      clientY = activator.touches[0]?.clientY ?? 0;
-    } else {
-      clientX = activator.clientX;
-      clientY = activator.clientY;
-    }
-    
-    const endX = clientX + delta.x;
-    const endY = clientY + delta.y;
-
-    const rect = boardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const nextPos = clampToBoard(endX - rect.left - 60, endY - rect.top - 60);
-    const localId = crypto.randomUUID();
-    const newItem: BuilderPlacedItem = {
-      localId,
-      clothingItemId,
-      imageUrl: src.imageUrl,
-      x: nextPos.x,
-      y: nextPos.y,
-      scale: 1,
-      rotation: 0,
-      zIndex: maxZ + 1,
-    };
-
-    setPlaced((prev) => [...prev, newItem]);
-    setSelected(localId);
-  }
-
   const selectedItem = placed.find((p) => p.localId === selected) ?? null;
   const itemsJson = JSON.stringify(
     placed
@@ -197,6 +108,10 @@ export function OutfitBuilderClient({
     });
   }
 
+  function updateItem(localId: string, patch: Partial<BuilderPlacedItem>) {
+    setPlaced((prev) => prev.map((i) => (i.localId === localId ? { ...i, ...patch } : i)));
+  }
+
   function updateSelected(patch: Partial<BuilderPlacedItem>) {
     if (!selected) return;
     setPlaced((prev) => prev.map((i) => (i.localId === selected ? { ...i, ...patch } : i)));
@@ -208,18 +123,16 @@ export function OutfitBuilderClient({
     setSelected(null);
   }
 
-  // Add item to board (on click)
   function addItemToBoard(src: ClosetItemForBuilder) {
     const localId = crypto.randomUUID();
-    // Place in center of board
     const boardWidth = boardRef.current?.clientWidth ?? 600;
     const boardHeight = boardRef.current?.clientHeight ?? 600;
     const newItem: BuilderPlacedItem = {
       localId,
       clothingItemId: src.id,
       imageUrl: src.imageUrl,
-      x: (boardWidth / 2) - 60, // Center horizontally
-      y: (boardHeight / 2) - 60, // Center vertically
+      x: (boardWidth / 2) - 60,
+      y: (boardHeight / 2) - 60,
       scale: 1,
       rotation: 0,
       zIndex: maxZ + 1,
@@ -248,206 +161,206 @@ export function OutfitBuilderClient({
         </div>
       </div>
 
-      <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-          {/* Left: closet */}
-          <aside className="glass-card rounded-3xl p-4">
-            <div className="font-display text-sm font-semibold text-slate-700">Closet Items</div>
-            <div className="mt-3 max-h-[560px] overflow-auto pr-1">
-              <div className="grid grid-cols-2 gap-2">
-                {closetItems.map((it) => (
-                  <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
-                ))}
-              </div>
+      <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
+        {/* Left: closet */}
+        <aside className="glass-card rounded-3xl p-4">
+          <div className="font-display text-sm font-semibold text-slate-700">Closet Items</div>
+          <div className="mt-3 max-h-[560px] overflow-auto pr-1">
+            <div className="grid grid-cols-2 gap-2">
+              {closetItems.map((it) => (
+                <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
+              ))}
             </div>
-            <div className="mt-3 text-[11px] text-slate-400">
-              Tipp: Tippe auf ein Item, um es hinzuzufügen. Halte gedrückt zum Verschieben.
-            </div>
-          </aside>
+          </div>
+          <div className="mt-3 text-[11px] text-slate-400">
+            Tippe auf ein Item, um es hinzuzufügen.
+          </div>
+        </aside>
 
-          {/* Right: board */}
-          <section className="space-y-3">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2">
-                <div className="text-xs text-slate-500">Name</div>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-10 w-[min(420px,70vw)]"
-                />
-              </div>
-
-              <form action={saveAction} className="flex items-center gap-2">
-                <input type="hidden" name="name" value={name} />
-                <input type="hidden" name="items" value={itemsJson} />
-                <input
-                  type="hidden"
-                  name="outfitId"
-                  value={initialOutfit?.id ?? ""}
-                />
-                <SaveSubmitButton disabledBecauseEmpty={!placed.length} />
-              </form>
-            </div>
-
-            {/* Background Color Selector */}
+        {/* Right: board */}
+        <section className="space-y-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="gap-2"
-                onClick={() => setShowColorPicker(!showColorPicker)}
-              >
-                <Palette className="h-4 w-4" />
-                Hintergrund
-                <div 
-                  className="h-4 w-4 rounded-full border border-slate-300" 
-                  style={{ backgroundColor: bgColor }}
-                />
-              </Button>
-              
-              {showColorPicker && (
-                <div className="flex items-center gap-1 flex-wrap">
-                  {BACKGROUND_COLORS.map((color) => (
-                    <button
-                      key={color.id}
-                      type="button"
-                      onClick={() => {
-                        setBgColor(color.value);
-                        setShowColorPicker(false);
-                      }}
-                      className={cn(
-                        "h-7 w-7 rounded-full border-2 transition-all hover:scale-110",
-                        bgColor === color.value ? "border-red-500 ring-2 ring-red-200" : "border-slate-200"
-                      )}
-                      style={{ backgroundColor: color.value }}
-                      title={color.label}
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="text-xs text-slate-500">Name</div>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-10 w-[min(420px,70vw)]"
+              />
             </div>
 
-            <div
-              ref={boardRef}
-              className="relative h-[600px] w-full overflow-hidden rounded-3xl border border-slate-200 shadow-inner touch-none"
-              style={{ backgroundColor: bgColor }}
-            >
-              <BoardDroppable id="board" />
+            <form action={saveAction} className="flex items-center gap-2">
+              <input type="hidden" name="name" value={name} />
+              <input type="hidden" name="items" value={itemsJson} />
+              <input
+                type="hidden"
+                name="outfitId"
+                value={initialOutfit?.id ?? ""}
+              />
+              <SaveSubmitButton disabledBecauseEmpty={!placed.length} />
+            </form>
+          </div>
 
-              {placed
-                .slice()
-                .sort((a, b) => a.zIndex - b.zIndex)
-                .map((it) => (
-                  <PlacedItemView
-                    key={it.localId}
-                    item={it}
-                    selected={it.localId === selected}
-                    onSelect={() => {
-                      setSelected(it.localId);
-                      bumpZ(it.localId);
+          {/* Background Color Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-2"
+              onClick={() => setShowColorPicker(!showColorPicker)}
+            >
+              <Palette className="h-4 w-4" />
+              Hintergrund
+              <div 
+                className="h-4 w-4 rounded-full border border-slate-300" 
+                style={{ backgroundColor: bgColor }}
+              />
+            </Button>
+            
+            {showColorPicker && (
+              <div className="flex items-center gap-1 flex-wrap">
+                {BACKGROUND_COLORS.map((color) => (
+                  <button
+                    key={color.id}
+                    type="button"
+                    onClick={() => {
+                      setBgColor(color.value);
+                      setShowColorPicker(false);
                     }}
+                    className={cn(
+                      "h-7 w-7 rounded-full border-2 transition-all hover:scale-110",
+                      bgColor === color.value ? "border-red-500 ring-2 ring-red-200" : "border-slate-200"
+                    )}
+                    style={{ backgroundColor: color.value }}
+                    title={color.label}
                   />
                 ))}
-            </div>
+              </div>
+            )}
+          </div>
 
-            {/* Controls */}
-            <div className="glass-card rounded-3xl p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm text-slate-600">
-                  {selectedItem ? (
-                    <div className="flex items-center gap-3">
-                      <span>
-                        Ausgewählt:{" "}
-                        <span className="font-medium text-slate-800">
-                          {selectedItem.clothingItemId.slice(0, 8)}…
-                        </span>
-                      </span>
-                      <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500">
-                        {Math.round(selectedItem.scale * 100)}% | {selectedItem.rotation}°
-                      </span>
-                    </div>
-                  ) : (
-                    "Tippe ein Item auf dem Board an."
-                  )}
-                </div>
+          {/* Board */}
+          <div
+            ref={boardRef}
+            className="relative h-[600px] w-full overflow-hidden rounded-3xl border border-slate-200 shadow-inner"
+            style={{ backgroundColor: bgColor, touchAction: "none" }}
+            onClick={() => setSelected(null)}
+          >
+            {placed
+              .slice()
+              .sort((a, b) => a.zIndex - b.zIndex)
+              .map((it) => (
+                <PlacedItemView
+                  key={it.localId}
+                  item={it}
+                  selected={it.localId === selected}
+                  boardRef={boardRef}
+                  onSelect={() => {
+                    setSelected(it.localId);
+                    bumpZ(it.localId);
+                  }}
+                  onUpdate={(patch) => updateItem(it.localId, patch)}
+                />
+              ))}
+          </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {/* Size Controls */}
-                  <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 rounded-full"
-                      disabled={!selectedItem}
-                      onClick={() =>
-                        updateSelected({
-                          scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.1),
-                        })
-                      }
-                      title="Kleiner"
-                    >
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
-                    <span className="text-xs text-slate-500 w-10 text-center">
-                      {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
+          {/* Controls */}
+          <div className="glass-card rounded-3xl p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-slate-600">
+                {selectedItem ? (
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span>
+                      Ausgewählt:{" "}
+                      <span className="font-medium text-slate-800">
+                        {selectedItem.clothingItemId.slice(0, 8)}…
+                      </span>
                     </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 rounded-full"
-                      disabled={!selectedItem}
-                      onClick={() =>
-                        updateSelected({
-                          scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.1),
-                        })
-                      }
-                      title="Größer"
-                    >
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
+                    <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-500">
+                      {Math.round(selectedItem.scale * 100)}% | {selectedItem.rotation}°
+                    </span>
                   </div>
+                ) : (
+                  "Tippe ein Item auf dem Board an."
+                )}
+              </div>
 
-                  {/* Rotation */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Size Controls */}
+                <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white p-1">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="gap-1.5"
+                    className="h-8 w-8 p-0 rounded-full"
                     disabled={!selectedItem}
                     onClick={() =>
                       updateSelected({
-                        rotation: ((selectedItem?.rotation ?? 0) + 15) % 360,
+                        scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.1),
                       })
                     }
+                    title="Kleiner"
                   >
-                    <RotateCw className="h-4 w-4" />
-                    +15°
+                    <ZoomOut className="h-4 w-4" />
                   </Button>
-
-                  {/* Delete */}
+                  <span className="text-xs text-slate-500 w-10 text-center">
+                    {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
+                  </span>
                   <Button
                     type="button"
-                    variant="secondary"
+                    variant="ghost"
                     size="sm"
-                    className="gap-2"
+                    className="h-8 w-8 p-0 rounded-full"
                     disabled={!selectedItem}
-                    onClick={removeSelected}
+                    onClick={() =>
+                      updateSelected({
+                        scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.1),
+                      })
+                    }
+                    title="Größer"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Löschen
+                    <ZoomIn className="h-4 w-4" />
                   </Button>
                 </div>
+
+                {/* Rotation */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={!selectedItem}
+                  onClick={() =>
+                    updateSelected({
+                      rotation: ((selectedItem?.rotation ?? 0) + 15) % 360,
+                    })
+                  }
+                >
+                  <RotateCw className="h-4 w-4" />
+                  +15°
+                </Button>
+
+                {/* Delete */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-2"
+                  disabled={!selectedItem}
+                  onClick={removeSelected}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Löschen
+                </Button>
               </div>
             </div>
-          </section>
-        </div>
-      </DndContext>
+          </div>
+        </section>
+      </div>
       
       <div className="text-[11px] text-slate-400">
-        Tipp: Auf Mobilgeräten halte ein Item gedrückt, um es zu verschieben.
+        Tipp: Verschiebe Items per Drag. Auf Mobilgeräten: 2 Finger zum Zoomen.
       </div>
     </div>
   );
@@ -469,11 +382,6 @@ function SaveSubmitButton({ disabledBecauseEmpty }: { disabledBecauseEmpty: bool
   );
 }
 
-function BoardDroppable({ id }: { id: string }) {
-  const { setNodeRef } = useDroppable({ id });
-  return <div ref={setNodeRef} className="absolute inset-0" />;
-}
-
 function ClosetTile({ item, onAdd }: { item: ClosetItemForBuilder; onAdd: () => void }) {
   return (
     <button
@@ -482,7 +390,6 @@ function ClosetTile({ item, onAdd }: { item: ClosetItemForBuilder; onAdd: () => 
       className="glass-card shine w-full rounded-2xl p-2 text-left transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
       title={`${item.category}${item.color ? ` · ${item.color}` : ""} – Tippen zum Hinzufügen`}
     >
-      {/* Checkered background to show transparency */}
       <div className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-[repeating-conic-gradient(#f1f5f9_0%_25%,#fff_0%_50%)] bg-[length:12px_12px] shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={item.imageUrl} alt={item.category} className="h-full w-full object-contain" />
@@ -498,62 +405,165 @@ function ClosetTile({ item, onAdd }: { item: ClosetItemForBuilder; onAdd: () => 
 function PlacedItemView({
   item,
   selected,
+  boardRef,
   onSelect,
+  onUpdate,
 }: {
   item: BuilderPlacedItem;
   selected: boolean;
+  boardRef: React.RefObject<HTMLDivElement | null>;
   onSelect: () => void;
+  onUpdate: (patch: Partial<BuilderPlacedItem>) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: `placed:${item.localId}` });
-
-  // Separate drag transform from scale/rotation to avoid zoom bug
-  const dragTransform = CSS.Transform.toString(transform);
+  const itemRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
   
-  // Outer container only handles position and drag
-  const outerStyle: React.CSSProperties = {
-    left: item.x,
-    top: item.y,
-    zIndex: item.zIndex,
-    transform: dragTransform || undefined,
-    opacity: isDragging ? 0.85 : 1,
+  // Track pinch state
+  const initialPinchDistance = React.useRef<number | null>(null);
+  const initialScale = React.useRef(item.scale);
+
+  const clampToBoard = (x: number, y: number) => {
+    const rect = boardRef.current?.getBoundingClientRect();
+    if (!rect) return { x, y };
+    const w = rect.width;
+    const h = rect.height;
+    const size = 120;
+    return { 
+      x: Math.max(0, Math.min(x, w - size)), 
+      y: Math.max(0, Math.min(y, h - size)) 
+    };
   };
 
-  // Inner container handles scale and rotation
-  const innerStyle: React.CSSProperties = {
-    transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
-    transformOrigin: "center",
+  const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
+    const dx = touch1.clientX - touch2.clientX;
+    const dy = touch1.clientY - touch2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // Calculate size based on scale for proper hit area
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    onSelect();
+    
+    if (e.pointerType === "touch") return;
+    
+    setIsDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging) return;
+    e.stopPropagation();
+    
+    const newX = item.x + e.movementX;
+    const newY = item.y + e.movementY;
+    const clamped = clampToBoard(newX, newY);
+    onUpdate({ x: clamped.x, y: clamped.y });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (isDragging) {
+      setIsDragging(false);
+      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    onSelect();
+    
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      initialPinchDistance.current = getDistance(e.touches[0], e.touches[1]);
+      initialScale.current = item.scale;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (e.touches.length === 1 && isDragging) {
+      const touch = e.touches[0];
+      const rect = boardRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      
+      const newX = touch.clientX - rect.left - 60;
+      const newY = touch.clientY - rect.top - 60;
+      const clamped = clampToBoard(newX, newY);
+      onUpdate({ x: clamped.x, y: clamped.y });
+    } else if (e.touches.length === 2 && initialPinchDistance.current !== null) {
+      const currentDistance = getDistance(e.touches[0], e.touches[1]);
+      const scaleFactor = currentDistance / initialPinchDistance.current;
+      const newScale = Math.max(0.3, Math.min(3, initialScale.current * scaleFactor));
+      onUpdate({ scale: newScale });
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+      initialPinchDistance.current = null;
+    } else if (e.touches.length === 1) {
+      initialPinchDistance.current = null;
+      initialScale.current = item.scale;
+    }
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    const newScale = Math.max(0.3, Math.min(3, item.scale + delta));
+    onUpdate({ scale: newScale });
+  };
+
   const baseSize = 120;
 
   return (
     <div
-      ref={setNodeRef}
-      style={outerStyle}
-      className="absolute cursor-grab select-none touch-none"
-      onPointerDownCapture={onSelect}
-      {...listeners}
-      {...attributes}
+      ref={itemRef}
+      style={{
+        position: "absolute",
+        left: item.x,
+        top: item.y,
+        zIndex: item.zIndex,
+        opacity: isDragging ? 0.85 : 1,
+        cursor: isDragging ? "grabbing" : "grab",
+        touchAction: "none",
+      }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onWheel={handleWheel}
     >
-      {/* Inner container for scale/rotation - prevents zoom bug */}
-      <div style={innerStyle}>
-        {/* Frei schwebende Klamotte ohne Box - wie ein Sticker */}
-        <div className="relative" style={{ width: baseSize, height: baseSize }}>
+      <div
+        style={{
+          transform: `rotate(${item.rotation}deg) scale(${item.scale})`,
+          transformOrigin: "center",
+        }}
+      >
+        <div className="relative select-none" style={{ width: baseSize, height: baseSize }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             src={item.imageUrl} 
             alt="" 
-            className="h-full w-full object-contain" 
+            className="h-full w-full object-contain pointer-events-none" 
             style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.15))" }}
+            draggable={false}
           />
-          {/* Selection indicator - subtle glow around the item */}
           {selected && (
-            <div className="absolute inset-0 rounded-lg ring-2 ring-red-400 ring-offset-0 pointer-events-none" 
-                 style={{ 
-                   background: "radial-gradient(circle, rgba(220,38,38,0.1) 0%, transparent 70%)" 
-                 }} 
+            <div 
+              className="absolute inset-0 rounded-lg ring-2 ring-red-400 ring-offset-0 pointer-events-none" 
+              style={{ background: "radial-gradient(circle, rgba(220,38,38,0.1) 0%, transparent 70%)" }} 
             />
           )}
         </div>
