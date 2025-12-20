@@ -50,22 +50,22 @@ export function DemoStore() {
           .
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {outfits.map((o) => (
-            <div key={o.id} className="glass-card shine rounded-3xl p-3">
+            <div key={o.id} className="glass-card shine rounded-3xl p-4">
               <Link href={`/store/${o.id}`} className="block">
                 <OutfitPreview outfit={o} itemsById={itemsById} />
-                <div className="mt-3 px-1">
-                  <div className="truncate text-sm font-semibold text-slate-800">{o.name}</div>
-                  <div className="mt-0.5 text-[11px] text-slate-400">
+                <div className="mt-4 px-1">
+                  <div className="truncate text-base font-semibold text-slate-800">{o.name}</div>
+                  <div className="mt-1 text-xs text-slate-400">
                     {new Date(o.createdAt).toLocaleDateString("de-DE")}
                   </div>
                 </div>
               </Link>
 
-              <div className="mt-3 flex items-center gap-2">
+              <div className="mt-4 flex items-center gap-2">
                 <Button asChild variant="ghost" size="sm" className="flex-1">
-                  <Link href={`/outfits/builder?outfitId=${o.id}`}>Edit</Link>
+                  <Link href={`/outfits/builder?outfitId=${o.id}`}>Bearbeiten</Link>
                 </Button>
                 <Button
                   type="button"
@@ -74,7 +74,7 @@ export function DemoStore() {
                   className="flex-1"
                   onClick={() => del(o.id)}
                 >
-                  Delete
+                  Löschen
                 </Button>
               </div>
             </div>
@@ -111,7 +111,9 @@ function OutfitPreview({
 
   if (placedItems.length === 0) {
     return (
-      <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-red-50 via-white to-rose-50 shadow-sm" />
+      <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-red-50 via-white to-rose-50 shadow-sm flex items-center justify-center">
+        <span className="text-slate-300 text-sm">Keine Items</span>
+      </div>
     );
   }
 
@@ -121,7 +123,7 @@ function OutfitPreview({
   const itemBaseSize = 120;
 
   return (
-    <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="aspect-square overflow-hidden rounded-2xl border border-slate-200 shadow-md bg-white">
       <div className="relative w-full h-full">
         {placedItems
           .slice()
@@ -155,7 +157,7 @@ function OutfitPreview({
                     src={item.imageDataUrl}
                     alt=""
                     className="h-full w-full object-contain"
-                    style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.1))" }}
+                    style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))" }}
                   />
                 </div>
               </div>
