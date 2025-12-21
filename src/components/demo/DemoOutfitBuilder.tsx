@@ -265,15 +265,13 @@ export function DemoOutfitBuilder() {
             ))}
           </div>
 
-          {/* Board - Hochformat (Breite: 450px, Höhe: 600px = 3:4 Ratio) */}
+          {/* Board - Hochformat (kleiner auf Mobile für bessere UX) */}
           <div
             ref={boardRef}
-            className="relative mx-auto overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)]"
+            className="relative mx-auto overflow-hidden rounded-2xl sm:rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)] w-[280px] sm:w-[350px] md:w-[450px]"
             style={{ 
               backgroundColor: bgColor, 
-              touchAction: "none",
-              width: "450px",
-              maxWidth: "100%",
+              touchAction: "auto",
               aspectRatio: "3 / 4",
             }}
             onClick={() => setSelected(null)}

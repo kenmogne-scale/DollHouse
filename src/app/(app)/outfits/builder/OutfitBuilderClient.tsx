@@ -13,6 +13,10 @@ import {
   RotateCw,
   Palette,
   Sparkles,
+  Maximize2,
+  Minimize2,
+  X,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -72,6 +76,32 @@ export function OutfitBuilderClient({
   );
   const [bgColor, setBgColor] = React.useState("#0a0a0a");
   const [showColorPicker, setShowColorPicker] = React.useState(false);
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
+  const [showClosetPanel, setShowClosetPanel] = React.useState(false);
+
+  // Escape key to exit fullscreen
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
+        setShowClosetPanel(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen]);
+
+  // Prevent body scroll when fullscreen
+  React.useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isFullscreen]);
 
   const maxZ = React.useMemo(
     () => placed.reduce((m, i) => Math.max(m, i.zIndex), 0),
@@ -208,7 +238,7 @@ export function OutfitBuilderClient({
             </form>
           </div>
 
-          {/* Background Color Selector */}
+          {/* Background Color Selector & Fullscreen Button */}
           <div className="flex items-center gap-3 flex-wrap">
             <Button
               type="button"
@@ -223,6 +253,17 @@ export function OutfitBuilderClient({
                 className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50 shadow-[0_0_8px_rgba(255,20,147,0.3)]" 
                 style={{ backgroundColor: bgColor }}
               />
+            </Button>
+            
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="gap-2 normal-case"
+              onClick={() => setIsFullscreen(true)}
+            >
+              <Maximize2 className="h-4 w-4" />
+              Vollbild
             </Button>
             
             {showColorPicker && (
@@ -249,15 +290,13 @@ export function OutfitBuilderClient({
             )}
           </div>
 
-          {/* Board - Hochformat (Breite: 450px, Höhe: 600px = 3:4 Ratio) */}
+          {/* Board - Hochformat (kleiner auf Mobile für bessere UX) */}
           <div
             ref={boardRef}
-            className="relative mx-auto overflow-hidden rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)]"
+            className="relative mx-auto overflow-hidden rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)] w-[280px] sm:w-[350px] md:w-[450px]"
             style={{ 
               backgroundColor: bgColor, 
-              touchAction: "none",
-              width: "450px",
-              maxWidth: "100%",
+              touchAction: "auto",
               aspectRatio: "3 / 4",
             }}
             onClick={() => setSelected(null)}
@@ -377,6 +416,236 @@ export function OutfitBuilderClient({
       <div className="text-[11px] text-white/30 text-center">
         Tipp: Verschiebe Items per Drag. Auf Mobilgeräten: 2 Finger zum Zoomen.
       </div>
+
+      {/* Fullscreen Overlay */}
+      {isFullscreen && (
+        <div 
+          className="fixed inset-0 z-50 flex"
+          style={{ backgroundColor: "#0a0a0a" }}
+        >
+          {/* Fullscreen Board */}
+          <div 
+            ref={boardRef}
+            className="flex-1 relative overflow-hidden"
+            style={{ 
+              backgroundColor: bgColor,
+              touchAction: "auto",
+            }}
+            onClick={() => setSelected(null)}
+          >
+            {placed
+              .slice()
+              .sort((a, b) => a.zIndex - b.zIndex)
+              .map((it) => (
+                <PlacedItemView
+                  key={it.localId}
+                  item={it}
+                  selected={it.localId === selected}
+                  boardRef={boardRef}
+                  onSelect={() => {
+                    setSelected(it.localId);
+                    bumpZ(it.localId);
+                  }}
+                  onUpdate={(patch) => updateItem(it.localId, patch)}
+                  isFullscreen={true}
+                />
+              ))}
+          </div>
+
+          {/* Closet Panel (Slide-in) */}
+          <div 
+            className={cn(
+              "absolute right-0 top-0 bottom-0 w-72 glass-card transition-transform duration-300 ease-out z-10 border-l-2 border-fuchsia-500/30",
+              showClosetPanel ? "translate-x-0" : "translate-x-full"
+            )}
+          >
+            <div className="p-4 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <div className="font-display text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-fuchsia-400" />
+                  Closet
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
+                  onClick={() => setShowClosetPanel(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-auto pr-1">
+                <div className="grid grid-cols-2 gap-3">
+                  {closetItems.map((it) => (
+                    <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Fullscreen Controls - Bottom Bar */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 glass-card border-t-2 border-fuchsia-500/30">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-white/60">
+                {selectedItem ? (
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span>
+                      Ausgewählt:{" "}
+                      <span className="font-bold text-fuchsia-400">
+                        {selectedItem.clothingItemId.slice(0, 8)}…
+                      </span>
+                    </span>
+                    <span className="text-xs px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
+                      {Math.round(selectedItem.scale * 100)}% | {selectedItem.rotation}°
+                    </span>
+                  </div>
+                ) : (
+                  "Tippe ein Item auf dem Board an."
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Add Items Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 normal-case"
+                  onClick={() => setShowClosetPanel(!showClosetPanel)}
+                >
+                  <Plus className="h-4 w-4" />
+                  Items
+                </Button>
+
+                {/* Background Color */}
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 normal-case"
+                    onClick={() => setShowColorPicker(!showColorPicker)}
+                  >
+                    <Palette className="h-4 w-4" />
+                    <div 
+                      className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50" 
+                      style={{ backgroundColor: bgColor }}
+                    />
+                  </Button>
+                  {showColorPicker && (
+                    <div className="absolute bottom-full left-0 mb-2 p-2 glass-card rounded-xl flex gap-2 flex-wrap w-48">
+                      {BACKGROUND_COLORS.map((color) => (
+                        <button
+                          key={color.id}
+                          type="button"
+                          onClick={() => {
+                            setBgColor(color.value);
+                            setShowColorPicker(false);
+                          }}
+                          className={cn(
+                            "h-7 w-7 rounded-full border-2 transition-all duration-200 hover:scale-110",
+                            bgColor === color.value 
+                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50" 
+                              : "border-fuchsia-500/30"
+                          )}
+                          style={{ backgroundColor: color.value }}
+                          title={color.label}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Size Controls */}
+                <div className="flex items-center gap-1 rounded-full border-2 border-fuchsia-500/30 bg-black/50 p-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
+                    disabled={!selectedItem}
+                    onClick={() =>
+                      updateSelected({
+                        scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.1),
+                      })
+                    }
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <span className="text-xs text-fuchsia-300 w-10 text-center font-bold">
+                    {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
+                    disabled={!selectedItem}
+                    onClick={() =>
+                      updateSelected({
+                        scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.1),
+                      })
+                    }
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Rotation */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5 normal-case"
+                  disabled={!selectedItem}
+                  onClick={() =>
+                    updateSelected({
+                      rotation: ((selectedItem?.rotation ?? 0) + 15) % 360,
+                    })
+                  }
+                >
+                  <RotateCw className="h-4 w-4" />
+                  +15°
+                </Button>
+
+                {/* Delete */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-2"
+                  disabled={!selectedItem}
+                  onClick={removeSelected}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+
+                {/* Exit Fullscreen */}
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  className="gap-2 normal-case"
+                  onClick={() => {
+                    setIsFullscreen(false);
+                    setShowClosetPanel(false);
+                  }}
+                >
+                  <Minimize2 className="h-4 w-4" />
+                  Beenden
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* ESC hint */}
+          <div className="absolute top-4 left-4 text-xs text-white/40">
+            ESC zum Beenden
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -423,12 +692,14 @@ function PlacedItemView({
   boardRef,
   onSelect,
   onUpdate,
+  isFullscreen = false,
 }: {
   item: BuilderPlacedItem;
   selected: boolean;
   boardRef: React.RefObject<HTMLDivElement | null>;
   onSelect: () => void;
   onUpdate: (patch: Partial<BuilderPlacedItem>) => void;
+  isFullscreen?: boolean;
 }) {
   const itemRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -437,15 +708,17 @@ function PlacedItemView({
   const initialPinchDistance = React.useRef<number | null>(null);
   const initialScale = React.useRef(item.scale);
 
+  // Größere Items im Vollbildmodus
+  const baseSize = isFullscreen ? 180 : 120;
+
   const clampToBoard = (x: number, y: number) => {
     const rect = boardRef.current?.getBoundingClientRect();
     if (!rect) return { x, y };
     const w = rect.width;
     const h = rect.height;
-    const size = 120;
     return { 
-      x: Math.max(0, Math.min(x, w - size)), 
-      y: Math.max(0, Math.min(y, h - size)) 
+      x: Math.max(0, Math.min(x, w - baseSize)), 
+      y: Math.max(0, Math.min(y, h - baseSize)) 
     };
   };
 
@@ -536,8 +809,6 @@ function PlacedItemView({
     const newScale = Math.max(0.3, Math.min(3, item.scale + delta));
     onUpdate({ scale: newScale });
   };
-
-  const baseSize = 120;
 
   return (
     <div
