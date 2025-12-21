@@ -42,6 +42,10 @@ export function DemoOutfitBuilder() {
   const outfitId = sp.get("outfitId");
 
   const boardRef = React.useRef<HTMLDivElement | null>(null);
+  const fullscreenBoardRef = React.useRef<HTMLDivElement | null>(null);
+  
+  // Track last known board size for scaling positions
+  const lastBoardSize = React.useRef<{ width: number; height: number } | null>(null);
 
   const [closet, setCloset] = React.useState<DemoClothingItem[]>([]);
   const [name, setName] = React.useState("Outfit 1");
@@ -60,17 +64,58 @@ export function DemoOutfitBuilder() {
     setShowColorPanel(false);
   };
 
+  // Scale positions when switching between fullscreen and normal
+  const scalePositionsForMode = React.useCallback((toFullscreen: boolean) => {
+    const normalBoard = boardRef.current;
+    const fullBoard = fullscreenBoardRef.current;
+    
+    if (!normalBoard) return;
+    
+    const fromRect = toFullscreen 
+      ? normalBoard.getBoundingClientRect()
+      : (lastBoardSize.current ?? { width: window.innerWidth, height: window.innerHeight });
+    
+    const toRect = toFullscreen
+      ? { width: window.innerWidth, height: window.innerHeight }
+      : normalBoard.getBoundingClientRect();
+    
+    // Save current board size
+    if (toFullscreen) {
+      lastBoardSize.current = { width: fromRect.width, height: fromRect.height };
+    }
+    
+    const scaleX = toRect.width / fromRect.width;
+    const scaleY = toRect.height / fromRect.height;
+    
+    setPlaced(prev => prev.map(item => ({
+      ...item,
+      x: item.x * scaleX,
+      y: item.y * scaleY,
+    })));
+  }, []);
+
+  // Handle fullscreen toggle with position scaling
+  const enterFullscreen = React.useCallback(() => {
+    scalePositionsForMode(true);
+    setIsFullscreen(true);
+  }, [scalePositionsForMode]);
+
+  const exitFullscreen = React.useCallback(() => {
+    scalePositionsForMode(false);
+    setIsFullscreen(false);
+    closeAllPanels();
+  }, [scalePositionsForMode]);
+
   // Escape key to exit fullscreen
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isFullscreen) {
-        setIsFullscreen(false);
-        closeAllPanels();
+        exitFullscreen();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFullscreen]);
+  }, [isFullscreen, exitFullscreen]);
 
   // Prevent body scroll when fullscreen
   React.useEffect(() => {
@@ -307,7 +352,7 @@ export function DemoOutfitBuilder() {
               variant="primary"
               size="sm"
               className="gap-1.5 normal-case flex-shrink-0 h-8 sm:h-9"
-              onClick={() => setIsFullscreen(true)}
+              onClick={enterFullscreen}
             >
               <Maximize2 className="h-4 w-4" />
               <span className="text-xs sm:text-sm">Vollbild</span>
@@ -418,16 +463,111 @@ export function DemoOutfitBuilder() {
         </section>
       </div>
 
-      {/* Fullscreen Overlay - Mobile-First Design */}
+      {/* Fullscreen Overlay - Navigation oben, Mobile-First */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 z-50 overflow-hidden"
+          className="fixed inset-0 z-50 overflow-hidden flex flex-col"
           style={{ backgroundColor: "#0a0a0a" }}
         >
-          {/* Fullscreen Board - Takes full screen */}
+          {/* TOP NAVBAR - Immer sichtbar */}
+          <div className="flex-shrink-0 glass-card border-b-2 border-fuchsia-500/30 z-30 safe-area-inset-top">
+            <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
+              {/* Left: Exit Button */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-10 gap-2 normal-case"
+                onClick={exitFullscreen}
+              >
+                <Minimize2 className="h-4 w-4" />
+                <span className="hidden sm:inline">Beenden</span>
+              </Button>
+
+              {/* Center: Quick Controls */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                {/* Tools Toggle */}
+                <Button
+                  type="button"
+                  variant={showToolsPanel ? "primary" : "ghost"}
+                  size="sm"
+                  className="h-10 w-10 p-0 rounded-xl"
+                  onClick={() => {
+                    setShowToolsPanel(!showToolsPanel);
+                    setShowClosetPanel(false);
+                    setShowColorPanel(false);
+                  }}
+                >
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+
+                {/* Color Toggle */}
+                <Button
+                  type="button"
+                  variant={showColorPanel ? "primary" : "ghost"}
+                  size="sm"
+                  className="h-10 w-10 p-0 rounded-xl"
+                  onClick={() => {
+                    setShowColorPanel(!showColorPanel);
+                    setShowClosetPanel(false);
+                    setShowToolsPanel(false);
+                  }}
+                >
+                  <div 
+                    className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50" 
+                    style={{ backgroundColor: bgColor }}
+                  />
+                </Button>
+
+                {/* Closet Toggle */}
+                <Button
+                  type="button"
+                  variant={showClosetPanel ? "primary" : "ghost"}
+                  size="sm"
+                  className="h-10 w-10 p-0 rounded-xl"
+                  onClick={() => {
+                    setShowClosetPanel(!showClosetPanel);
+                    setShowToolsPanel(false);
+                    setShowColorPanel(false);
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Right: Save Button */}
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                className="h-10 gap-2"
+                onClick={() => {
+                  save();
+                  exitFullscreen();
+                }}
+                disabled={placed.length === 0}
+              >
+                <Check className="h-4 w-4" />
+                <span className="hidden sm:inline font-bold">Fertig</span>
+              </Button>
+            </div>
+
+            {/* Selected Item Info Bar */}
+            {selectedItem && (
+              <div className="px-3 pb-2 sm:px-4">
+                <div className="flex items-center justify-center gap-4 text-xs">
+                  <span className="px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
+                    {Math.round(selectedItem.scale * 100)}% · {selectedItem.rotation}°
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* FULLSCREEN BOARD - Fills remaining space */}
           <div 
-            ref={boardRef}
-            className="absolute inset-0"
+            ref={fullscreenBoardRef}
+            className="flex-1 relative overflow-hidden"
             style={{ 
               backgroundColor: bgColor,
               touchAction: "none",
@@ -445,13 +585,12 @@ export function DemoOutfitBuilder() {
                   key={it.localId}
                   item={it}
                   selected={it.localId === selected}
-                  boardRef={boardRef}
+                  boardRef={fullscreenBoardRef}
                   onSelect={() => {
                     setSelected(it.localId);
                     bumpZ(it.localId);
                   }}
                   onUpdate={(patch) => updateItem(it.localId, patch)}
-                  isFullscreen={true}
                 />
               ))}
           </div>
@@ -460,6 +599,7 @@ export function DemoOutfitBuilder() {
           {(showClosetPanel || showToolsPanel || showColorPanel) && (
             <div 
               className="absolute inset-0 bg-black/40 z-10 transition-opacity duration-200"
+              style={{ top: '60px' }}
               onClick={closeAllPanels}
             />
           )}
@@ -467,9 +607,10 @@ export function DemoOutfitBuilder() {
           {/* LEFT: Tools Panel (Slide-in from left) */}
           <div 
             className={cn(
-              "absolute left-0 top-0 bottom-0 w-16 sm:w-20 glass-card transition-transform duration-300 ease-out z-20 border-r-2 border-fuchsia-500/30 flex flex-col items-center py-4 gap-2 safe-area-inset-left",
+              "absolute left-0 bottom-0 w-16 sm:w-20 glass-card transition-transform duration-300 ease-out z-20 border-r-2 border-fuchsia-500/30 flex flex-col items-center py-4 gap-2",
               showToolsPanel ? "translate-x-0" : "-translate-x-full"
             )}
+            style={{ top: '60px' }}
           >
             {/* Size Controls */}
             <div className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-black/30 border border-fuchsia-500/20">
@@ -552,9 +693,10 @@ export function DemoOutfitBuilder() {
           {/* RIGHT: Closet Panel (Slide-in from right) */}
           <div 
             className={cn(
-              "absolute right-0 top-0 bottom-0 w-[75vw] max-w-xs glass-card transition-transform duration-300 ease-out z-20 border-l-2 border-fuchsia-500/30 safe-area-inset-right",
+              "absolute right-0 bottom-0 w-[70vw] max-w-xs glass-card transition-transform duration-300 ease-out z-20 border-l-2 border-fuchsia-500/30",
               showClosetPanel ? "translate-x-0" : "translate-x-full"
             )}
+            style={{ top: '60px' }}
           >
             <div className="p-3 sm:p-4 h-full flex flex-col">
               <div className="flex items-center justify-between mb-3">
@@ -578,10 +720,7 @@ export function DemoOutfitBuilder() {
                     <button
                       key={it.id}
                       type="button"
-                      onClick={() => {
-                        addItemToBoard(it);
-                        // Optionally close panel after adding on mobile
-                      }}
+                      onClick={() => addItemToBoard(it)}
                       className="glass-card rounded-xl p-1.5 sm:p-2 transition-all duration-200 active:scale-95 hover:border-fuchsia-500/60 border border-fuchsia-500/20"
                     >
                       <div className="aspect-square overflow-hidden rounded-lg bg-black/30">
@@ -598,12 +737,13 @@ export function DemoOutfitBuilder() {
             </div>
           </div>
 
-          {/* BOTTOM RIGHT: Color Panel (Slide-up from bottom) */}
+          {/* Color Panel (Popup below navbar) */}
           <div 
             className={cn(
-              "absolute bottom-20 right-4 glass-card rounded-2xl transition-all duration-300 ease-out z-20 border-2 border-fuchsia-500/30 p-3",
-              showColorPanel ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+              "absolute left-1/2 -translate-x-1/2 glass-card rounded-2xl transition-all duration-300 ease-out z-20 border-2 border-fuchsia-500/30 p-3",
+              showColorPanel ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             )}
+            style={{ top: '70px' }}
           >
             <div className="grid grid-cols-5 gap-2">
               {BACKGROUND_COLORS.map((color) => (
@@ -627,117 +767,9 @@ export function DemoOutfitBuilder() {
             </div>
           </div>
 
-          {/* FLOATING ACTION BUTTONS - Bottom */}
-          <div className="absolute bottom-0 left-0 right-0 safe-area-inset-bottom">
-            <div className="flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4">
-              {/* Left: Tools Toggle */}
-              <Button
-                type="button"
-                variant={showToolsPanel ? "primary" : "ghost"}
-                size="sm"
-                className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
-                onClick={() => {
-                  setShowToolsPanel(!showToolsPanel);
-                  setShowClosetPanel(false);
-                  setShowColorPanel(false);
-                }}
-              >
-                <Settings2 className="h-5 w-5 sm:h-6 sm:w-6" />
-              </Button>
-
-              {/* Center: Quick Actions */}
-              <div className="flex items-center gap-2 sm:gap-3">
-                {/* Color Toggle */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
-                  onClick={() => {
-                    setShowColorPanel(!showColorPanel);
-                    setShowClosetPanel(false);
-                    setShowToolsPanel(false);
-                  }}
-                >
-                  <div 
-                    className="h-6 w-6 sm:h-7 sm:w-7 rounded-full border-2 border-fuchsia-500/50" 
-                    style={{ backgroundColor: bgColor }}
-                  />
-                </Button>
-
-                {/* Save Button */}
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="sm"
-                  className="h-12 px-4 sm:h-14 sm:px-6 rounded-2xl shadow-lg gap-2"
-                  onClick={() => {
-                    save();
-                    setIsFullscreen(false);
-                  }}
-                  disabled={placed.length === 0}
-                >
-                  <Check className="h-5 w-5" />
-                  <span className="hidden sm:inline font-bold">Fertig</span>
-                </Button>
-
-                {/* Exit Button */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
-                  onClick={() => {
-                    setIsFullscreen(false);
-                    closeAllPanels();
-                  }}
-                >
-                  <Minimize2 className="h-5 w-5 sm:h-6 sm:w-6" />
-                </Button>
-              </div>
-
-              {/* Right: Closet Toggle */}
-              <Button
-                type="button"
-                variant={showClosetPanel ? "primary" : "ghost"}
-                size="sm"
-                className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
-                onClick={() => {
-                  setShowClosetPanel(!showClosetPanel);
-                  setShowToolsPanel(false);
-                  setShowColorPanel(false);
-                }}
-              >
-                <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
-              </Button>
-            </div>
-          </div>
-
-          {/* TOP: Status Bar */}
-          <div className="absolute top-0 left-0 right-0 safe-area-inset-top">
-            <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
-              {/* Item count */}
-              <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-fuchsia-500/20">
-                <span className="text-xs text-white/60">
-                  <span className="text-fuchsia-400 font-bold">{placed.length}</span> Items
-                </span>
-              </div>
-
-              {/* Selected Item Info */}
-              {selectedItem && (
-                <div className="px-3 py-1.5 rounded-full bg-fuchsia-500/20 backdrop-blur-sm border border-fuchsia-500/30">
-                  <span className="text-xs text-fuchsia-300 font-bold">
-                    {Math.round(selectedItem.scale * 100)}% · {selectedItem.rotation}°
-                  </span>
-                </div>
-              )}
-
-              {/* Hint */}
-              <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10">
-                <span className="text-[10px] text-white/40 hidden sm:inline">ESC zum Beenden</span>
-                <span className="text-[10px] text-white/40 sm:hidden">Tippen zum Ziehen</span>
-              </div>
-            </div>
+          {/* Mobile hint at bottom */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 z-5">
+            <span className="text-[10px] text-white/40">Tippe & ziehe Items • 2 Finger zum Zoomen</span>
           </div>
         </div>
       )}
@@ -771,14 +803,12 @@ function PlacedItemView({
   boardRef,
   onSelect,
   onUpdate,
-  isFullscreen = false,
 }: {
   item: Placed;
   selected: boolean;
   boardRef: React.RefObject<HTMLDivElement | null>;
   onSelect: () => void;
   onUpdate: (patch: Partial<Placed>) => void;
-  isFullscreen?: boolean;
 }) {
   const itemRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -787,8 +817,8 @@ function PlacedItemView({
   const initialPinchDistance = React.useRef<number | null>(null);
   const initialScale = React.useRef(item.scale);
 
-  // Größere Items im Vollbildmodus
-  const baseSize = isFullscreen ? 180 : 120;
+  // Konstante Größe für Items (keine Änderung zwischen Modi)
+  const baseSize = 120;
 
   const clampToBoard = (x: number, y: number) => {
     const rect = boardRef.current?.getBoundingClientRect();
