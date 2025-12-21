@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette, Sparkles, Maximize2, Minimize2, X, Plus, Shirt, Settings2, Check, ChevronLeft, ChevronRight, Undo2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette, Sparkles, Maximize2, Minimize2, Plus, Shirt, Settings2, Check, ChevronLeft, ChevronRight, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
@@ -67,7 +67,6 @@ export function DemoOutfitBuilder() {
   // Scale positions when switching between fullscreen and normal
   const scalePositionsForMode = React.useCallback((toFullscreen: boolean) => {
     const normalBoard = boardRef.current;
-    const fullBoard = fullscreenBoardRef.current;
     
     if (!normalBoard) return;
     
