@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette, Sparkles, Maximize2, Minimize2, X, Plus } from "lucide-react";
+import { ArrowLeft, Save, Trash2, ZoomIn, ZoomOut, RotateCw, Palette, Sparkles, Maximize2, Minimize2, X, Plus, Shirt, Settings2, Check, ChevronLeft, ChevronRight, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
@@ -50,13 +50,22 @@ export function DemoOutfitBuilder() {
   const [bgColor, setBgColor] = React.useState("#0a0a0a");
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [showClosetPanel, setShowClosetPanel] = React.useState(false);
+  const [showToolsPanel, setShowToolsPanel] = React.useState(false);
+  const [showColorPanel, setShowColorPanel] = React.useState(false);
+
+  // Close all panels helper
+  const closeAllPanels = () => {
+    setShowClosetPanel(false);
+    setShowToolsPanel(false);
+    setShowColorPanel(false);
+  };
 
   // Escape key to exit fullscreen
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isFullscreen) {
         setIsFullscreen(false);
-        setShowClosetPanel(false);
+        closeAllPanels();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -192,7 +201,7 @@ export function DemoOutfitBuilder() {
   }
 
   return (
-    <div className="space-y-3 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -224,11 +233,11 @@ export function DemoOutfitBuilder() {
         </div>
       ) : null}
 
-      {/* Mobile: Horizontal scrolling closet items */}
-      <div className="lg:hidden">
+      {/* Mobile: Horizontal scrolling closet items - contained width */}
+      <div className="lg:hidden w-full max-w-full">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-400">Items:</span>
-          <div className="flex gap-1.5 overflow-x-auto pb-2 flex-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-fuchsia-400 flex-shrink-0">Items:</span>
+          <div className="flex gap-1.5 overflow-x-auto pb-2 flex-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             {closet.map((it) => (
               <button
                 key={it.id}
@@ -271,33 +280,37 @@ export function DemoOutfitBuilder() {
             />
           </div>
 
-          {/* Background Color Selector & Fullscreen Button */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-            <Palette className="h-4 w-4 text-fuchsia-400 flex-shrink-0" />
-            {BACKGROUND_COLORS.map((color) => (
-              <button
-                key={color.id}
-                type="button"
-                onClick={() => setBgColor(color.value)}
-                className={cn(
-                  "h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 transition-all duration-200 flex-shrink-0",
-                  bgColor === color.value 
-                    ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 scale-110 shadow-[0_0_15px_rgba(255,20,147,0.5)]" 
-                    : "border-fuchsia-500/30 hover:border-fuchsia-500/60"
-                )}
-                style={{ backgroundColor: color.value }}
-                title={color.label}
-              />
-            ))}
+          {/* Background Color & Fullscreen - Mobile optimized */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <Palette className="h-4 w-4 text-fuchsia-400 flex-shrink-0" />
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                {BACKGROUND_COLORS.slice(0, 6).map((color) => (
+                  <button
+                    key={color.id}
+                    type="button"
+                    onClick={() => setBgColor(color.value)}
+                    className={cn(
+                      "h-6 w-6 sm:h-7 sm:w-7 rounded-full border-2 transition-all duration-200 flex-shrink-0",
+                      bgColor === color.value 
+                        ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 scale-110 shadow-[0_0_15px_rgba(255,20,147,0.5)]" 
+                        : "border-fuchsia-500/30 hover:border-fuchsia-500/60"
+                    )}
+                    style={{ backgroundColor: color.value }}
+                    title={color.label}
+                  />
+                ))}
+              </div>
+            </div>
             <Button
               type="button"
               variant="primary"
               size="sm"
-              className="gap-1.5 normal-case ml-2 flex-shrink-0"
+              className="gap-1.5 normal-case flex-shrink-0 h-8 sm:h-9"
               onClick={() => setIsFullscreen(true)}
             >
               <Maximize2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Vollbild</span>
+              <span className="text-xs sm:text-sm">Vollbild</span>
             </Button>
           </div>
 
@@ -405,21 +418,24 @@ export function DemoOutfitBuilder() {
         </section>
       </div>
 
-      {/* Fullscreen Overlay */}
+      {/* Fullscreen Overlay - Mobile-First Design */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 z-50 flex"
+          className="fixed inset-0 z-50 overflow-hidden"
           style={{ backgroundColor: "#0a0a0a" }}
         >
-          {/* Fullscreen Board */}
+          {/* Fullscreen Board - Takes full screen */}
           <div 
             ref={boardRef}
-            className="flex-1 relative overflow-hidden"
+            className="absolute inset-0"
             style={{ 
               backgroundColor: bgColor,
-              touchAction: "auto",
+              touchAction: "none",
             }}
-            onClick={() => setSelected(null)}
+            onClick={() => {
+              setSelected(null);
+              closeAllPanels();
+            }}
           >
             {placed
               .slice()
@@ -440,17 +456,110 @@ export function DemoOutfitBuilder() {
               ))}
           </div>
 
-          {/* Closet Panel (Slide-in) */}
+          {/* Backdrop when any panel is open */}
+          {(showClosetPanel || showToolsPanel || showColorPanel) && (
+            <div 
+              className="absolute inset-0 bg-black/40 z-10 transition-opacity duration-200"
+              onClick={closeAllPanels}
+            />
+          )}
+
+          {/* LEFT: Tools Panel (Slide-in from left) */}
           <div 
             className={cn(
-              "absolute right-0 top-0 bottom-0 w-72 glass-card transition-transform duration-300 ease-out z-10 border-l-2 border-fuchsia-500/30",
+              "absolute left-0 top-0 bottom-0 w-16 sm:w-20 glass-card transition-transform duration-300 ease-out z-20 border-r-2 border-fuchsia-500/30 flex flex-col items-center py-4 gap-2 safe-area-inset-left",
+              showToolsPanel ? "translate-x-0" : "-translate-x-full"
+            )}
+          >
+            {/* Size Controls */}
+            <div className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-black/30 border border-fuchsia-500/20">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-11 w-11 p-0 rounded-xl min-w-0 min-h-0"
+                disabled={!selectedItem}
+                onClick={() => updateSelected({ scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.15) })}
+              >
+                <ZoomIn className="h-5 w-5" />
+              </Button>
+              <span className="text-[10px] text-fuchsia-300 font-bold">
+                {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-11 w-11 p-0 rounded-xl min-w-0 min-h-0"
+                disabled={!selectedItem}
+                onClick={() => updateSelected({ scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.15) })}
+              >
+                <ZoomOut className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Rotation */}
+            <div className="flex flex-col items-center gap-1 p-2 rounded-2xl bg-black/30 border border-fuchsia-500/20">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-11 w-11 p-0 rounded-xl min-w-0 min-h-0"
+                disabled={!selectedItem}
+                onClick={() => updateSelected({ rotation: ((selectedItem?.rotation ?? 0) + 15) % 360 })}
+              >
+                <RotateCw className="h-5 w-5" />
+              </Button>
+              <span className="text-[10px] text-fuchsia-300 font-bold">
+                {selectedItem ? `${selectedItem.rotation}°` : "—"}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-11 w-11 p-0 rounded-xl min-w-0 min-h-0"
+                disabled={!selectedItem}
+                onClick={() => updateSelected({ rotation: ((selectedItem?.rotation ?? 0) - 15 + 360) % 360 })}
+              >
+                <Undo2 className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Delete */}
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-11 w-11 p-0 rounded-xl mt-auto"
+              disabled={!selectedItem}
+              onClick={removeSelected}
+            >
+              <Trash2 className="h-5 w-5" />
+            </Button>
+
+            {/* Close Panel */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 p-0 rounded-full min-w-0 min-h-0"
+              onClick={() => setShowToolsPanel(false)}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* RIGHT: Closet Panel (Slide-in from right) */}
+          <div 
+            className={cn(
+              "absolute right-0 top-0 bottom-0 w-[75vw] max-w-xs glass-card transition-transform duration-300 ease-out z-20 border-l-2 border-fuchsia-500/30 safe-area-inset-right",
               showClosetPanel ? "translate-x-0" : "translate-x-full"
             )}
           >
-            <div className="p-4 h-full flex flex-col">
-              <div className="flex items-center justify-between mb-4">
+            <div className="p-3 sm:p-4 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
                 <div className="font-display text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-fuchsia-400" />
+                  <Shirt className="h-4 w-4 text-fuchsia-400" />
                   Closet
                 </div>
                 <Button
@@ -460,150 +569,175 @@ export function DemoOutfitBuilder() {
                   className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
                   onClick={() => setShowClosetPanel(false)}
                 >
-                  <X className="h-4 w-4" />
+                  <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
-              <div className="flex-1 overflow-auto pr-1">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 -mr-1">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {closet.map((it) => (
-                    <ClosetTile key={it.id} item={it} onAdd={() => addItemToBoard(it)} />
+                    <button
+                      key={it.id}
+                      type="button"
+                      onClick={() => {
+                        addItemToBoard(it);
+                        // Optionally close panel after adding on mobile
+                      }}
+                      className="glass-card rounded-xl p-1.5 sm:p-2 transition-all duration-200 active:scale-95 hover:border-fuchsia-500/60 border border-fuchsia-500/20"
+                    >
+                      <div className="aspect-square overflow-hidden rounded-lg bg-black/30">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={it.imageDataUrl} alt={it.category} className="h-full w-full object-contain" />
+                      </div>
+                      <div className="mt-1 text-center">
+                        <span className="text-[10px] text-fuchsia-400 font-bold uppercase">+ Add</span>
+                      </div>
+                    </button>
                   ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Fullscreen Controls - Bottom Bar */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 glass-card border-t-2 border-fuchsia-500/30">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="text-sm text-white/60">
-                {selectedItem ? (
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-xs px-3 py-1 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
-                      {Math.round(selectedItem.scale * 100)}% | {selectedItem.rotation}°
-                    </span>
-                  </div>
-                ) : (
-                  "Tippe ein Item auf dem Board an."
-                )}
-              </div>
+          {/* BOTTOM RIGHT: Color Panel (Slide-up from bottom) */}
+          <div 
+            className={cn(
+              "absolute bottom-20 right-4 glass-card rounded-2xl transition-all duration-300 ease-out z-20 border-2 border-fuchsia-500/30 p-3",
+              showColorPanel ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+            )}
+          >
+            <div className="grid grid-cols-5 gap-2">
+              {BACKGROUND_COLORS.map((color) => (
+                <button
+                  key={color.id}
+                  type="button"
+                  onClick={() => {
+                    setBgColor(color.value);
+                    setShowColorPanel(false);
+                  }}
+                  className={cn(
+                    "h-9 w-9 rounded-full border-2 transition-all duration-200 active:scale-90",
+                    bgColor === color.value 
+                      ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 scale-110" 
+                      : "border-white/20 hover:border-fuchsia-500/60"
+                  )}
+                  style={{ backgroundColor: color.value }}
+                  title={color.label}
+                />
+              ))}
+            </div>
+          </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Add Items Button */}
+          {/* FLOATING ACTION BUTTONS - Bottom */}
+          <div className="absolute bottom-0 left-0 right-0 safe-area-inset-bottom">
+            <div className="flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4">
+              {/* Left: Tools Toggle */}
+              <Button
+                type="button"
+                variant={showToolsPanel ? "primary" : "ghost"}
+                size="sm"
+                className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
+                onClick={() => {
+                  setShowToolsPanel(!showToolsPanel);
+                  setShowClosetPanel(false);
+                  setShowColorPanel(false);
+                }}
+              >
+                <Settings2 className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
+
+              {/* Center: Quick Actions */}
+              <div className="flex items-center gap-2 sm:gap-3">
+                {/* Color Toggle */}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="gap-2 normal-case"
-                  onClick={() => setShowClosetPanel(!showClosetPanel)}
+                  className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
+                  onClick={() => {
+                    setShowColorPanel(!showColorPanel);
+                    setShowClosetPanel(false);
+                    setShowToolsPanel(false);
+                  }}
                 >
-                  <Plus className="h-4 w-4" />
-                  Items
+                  <div 
+                    className="h-6 w-6 sm:h-7 sm:w-7 rounded-full border-2 border-fuchsia-500/50" 
+                    style={{ backgroundColor: bgColor }}
+                  />
                 </Button>
 
-                {/* Background Color */}
-                <div className="flex items-center gap-1">
-                  {BACKGROUND_COLORS.slice(0, 5).map((color) => (
-                    <button
-                      key={color.id}
-                      type="button"
-                      onClick={() => setBgColor(color.value)}
-                      className={cn(
-                        "h-6 w-6 rounded-full border-2 transition-all duration-200",
-                        bgColor === color.value 
-                          ? "border-fuchsia-500 ring-1 ring-fuchsia-500/50" 
-                          : "border-fuchsia-500/30"
-                      )}
-                      style={{ backgroundColor: color.value }}
-                    />
-                  ))}
-                </div>
-
-                {/* Size Controls */}
-                <div className="flex items-center gap-1 rounded-full border-2 border-fuchsia-500/30 bg-black/50 p-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
-                    disabled={!selectedItem}
-                    onClick={() =>
-                      updateSelected({
-                        scale: Math.max(0.3, (selectedItem?.scale ?? 1) - 0.1),
-                      })
-                    }
-                  >
-                    <ZoomOut className="h-4 w-4" />
-                  </Button>
-                  <span className="text-xs text-fuchsia-300 w-10 text-center font-bold">
-                    {selectedItem ? `${Math.round(selectedItem.scale * 100)}%` : "—"}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 rounded-full min-w-0 min-h-0"
-                    disabled={!selectedItem}
-                    onClick={() =>
-                      updateSelected({
-                        scale: Math.min(3, (selectedItem?.scale ?? 1) + 0.1),
-                      })
-                    }
-                  >
-                    <ZoomIn className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Rotation */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="gap-1.5 normal-case"
-                  disabled={!selectedItem}
-                  onClick={() =>
-                    updateSelected({
-                      rotation: ((selectedItem?.rotation ?? 0) + 15) % 360,
-                    })
-                  }
-                >
-                  <RotateCw className="h-4 w-4" />
-                  +15°
-                </Button>
-
-                {/* Delete */}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="h-8 w-8 p-0 rounded-full"
-                  disabled={!selectedItem}
-                  onClick={removeSelected}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-
-                {/* Exit Fullscreen */}
+                {/* Save Button */}
                 <Button
                   type="button"
                   variant="primary"
                   size="sm"
-                  className="gap-2 normal-case"
+                  className="h-12 px-4 sm:h-14 sm:px-6 rounded-2xl shadow-lg gap-2"
+                  onClick={() => {
+                    save();
+                    setIsFullscreen(false);
+                  }}
+                  disabled={placed.length === 0}
+                >
+                  <Check className="h-5 w-5" />
+                  <span className="hidden sm:inline font-bold">Fertig</span>
+                </Button>
+
+                {/* Exit Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
                   onClick={() => {
                     setIsFullscreen(false);
-                    setShowClosetPanel(false);
+                    closeAllPanels();
                   }}
                 >
-                  <Minimize2 className="h-4 w-4" />
-                  Beenden
+                  <Minimize2 className="h-5 w-5 sm:h-6 sm:w-6" />
                 </Button>
               </div>
+
+              {/* Right: Closet Toggle */}
+              <Button
+                type="button"
+                variant={showClosetPanel ? "primary" : "ghost"}
+                size="sm"
+                className="h-12 w-12 sm:h-14 sm:w-14 p-0 rounded-2xl shadow-lg border-2 border-fuchsia-500/30 bg-black/70 backdrop-blur-sm"
+                onClick={() => {
+                  setShowClosetPanel(!showClosetPanel);
+                  setShowToolsPanel(false);
+                  setShowColorPanel(false);
+                }}
+              >
+                <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
             </div>
           </div>
 
-          {/* ESC hint */}
-          <div className="absolute top-4 left-4 text-xs text-white/40">
-            ESC zum Beenden
+          {/* TOP: Status Bar */}
+          <div className="absolute top-0 left-0 right-0 safe-area-inset-top">
+            <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
+              {/* Item count */}
+              <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-fuchsia-500/20">
+                <span className="text-xs text-white/60">
+                  <span className="text-fuchsia-400 font-bold">{placed.length}</span> Items
+                </span>
+              </div>
+
+              {/* Selected Item Info */}
+              {selectedItem && (
+                <div className="px-3 py-1.5 rounded-full bg-fuchsia-500/20 backdrop-blur-sm border border-fuchsia-500/30">
+                  <span className="text-xs text-fuchsia-300 font-bold">
+                    {Math.round(selectedItem.scale * 100)}% · {selectedItem.rotation}°
+                  </span>
+                </div>
+              )}
+
+              {/* Hint */}
+              <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm border border-white/10">
+                <span className="text-[10px] text-white/40 hidden sm:inline">ESC zum Beenden</span>
+                <span className="text-[10px] text-white/40 sm:hidden">Tippen zum Ziehen</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
