@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 // Keine Authentifizierung mehr erforderlich - direkter Zugang zur App
-export async function middleware(req: NextRequest) {
+export function middleware() {
   // Alle Routen sind jetzt öffentlich zugänglich
   return NextResponse.next();
 }
