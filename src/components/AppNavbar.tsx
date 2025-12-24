@@ -32,7 +32,7 @@ export function AppNavbar({
             <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500/30 to-violet-500/30 border border-fuchsia-500/40 shadow-[0_0_10px_rgba(255,20,147,0.3)]">
               <Sparkles className="h-4 w-4 text-fuchsia-400" />
             </span>
-            <span className="hidden xs:inline y2k-gradient-text">DollCloset</span>
+            <span className="hidden xs:inline y2k-gradient-text">Laura's Closet</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -92,8 +92,8 @@ export function AppNavbar({
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200",
-                  isActive 
-                    ? "text-fuchsia-400 bg-fuchsia-500/20 shadow-[0_0_15px_rgba(255,20,147,0.3)]" 
+                  isActive
+                    ? "text-fuchsia-400 bg-fuchsia-500/20 shadow-[0_0_15px_rgba(255,20,147,0.3)]"
                     : "text-white/50 hover:text-white/80"
                 )}
               >

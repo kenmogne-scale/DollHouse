@@ -249,12 +249,12 @@ export function OutfitBuilderClient({
             >
               <Palette className="h-4 w-4" />
               Hintergrund
-              <div 
-                className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50 shadow-[0_0_8px_rgba(255,20,147,0.3)]" 
+              <div
+                className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50 shadow-[0_0_8px_rgba(255,20,147,0.3)]"
                 style={{ backgroundColor: bgColor }}
               />
             </Button>
-            
+
             <Button
               type="button"
               variant="primary"
@@ -265,7 +265,7 @@ export function OutfitBuilderClient({
               <Maximize2 className="h-4 w-4" />
               Vollbild
             </Button>
-            
+
             {showColorPicker && (
               <div className="flex items-center gap-2 flex-wrap">
                 {BACKGROUND_COLORS.map((color) => (
@@ -278,8 +278,8 @@ export function OutfitBuilderClient({
                     }}
                     className={cn(
                       "h-8 w-8 rounded-full border-2 transition-all duration-200 hover:scale-110",
-                      bgColor === color.value 
-                        ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 shadow-[0_0_15px_rgba(255,20,147,0.5)]" 
+                      bgColor === color.value
+                        ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50 shadow-[0_0_15px_rgba(255,20,147,0.5)]"
                         : "border-fuchsia-500/30 hover:border-fuchsia-500/60"
                     )}
                     style={{ backgroundColor: color.value }}
@@ -294,8 +294,8 @@ export function OutfitBuilderClient({
           <div
             ref={boardRef}
             className="relative mx-auto overflow-hidden rounded-3xl border-2 border-fuchsia-500/30 shadow-[inset_0_0_40px_rgba(255,20,147,0.1),0_0_40px_rgba(255,20,147,0.1)] w-[280px] sm:w-[350px] md:w-[450px]"
-            style={{ 
-              backgroundColor: bgColor, 
+            style={{
+              backgroundColor: bgColor,
               touchAction: "auto",
               aspectRatio: "3 / 4",
             }}
@@ -412,22 +412,22 @@ export function OutfitBuilderClient({
           </div>
         </section>
       </div>
-      
+
       <div className="text-[11px] text-white/30 text-center">
-        Tipp: Verschiebe Items per Drag. Auf Mobilgeräten: 2 Finger zum Zoomen.
+        Tipp: Verschiebe Items per Drag. Auf Mobilgeräten: 2 Finger zum Zoomen & Drehen.
       </div>
 
       {/* Fullscreen Overlay */}
       {isFullscreen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex"
           style={{ backgroundColor: "#0a0a0a" }}
         >
           {/* Fullscreen Board */}
-          <div 
+          <div
             ref={boardRef}
             className="flex-1 relative overflow-hidden"
-            style={{ 
+            style={{
               backgroundColor: bgColor,
               touchAction: "auto",
             }}
@@ -453,7 +453,7 @@ export function OutfitBuilderClient({
           </div>
 
           {/* Closet Panel (Slide-in) */}
-          <div 
+          <div
             className={cn(
               "absolute right-0 top-0 bottom-0 w-72 glass-card transition-transform duration-300 ease-out z-10 border-l-2 border-fuchsia-500/30",
               showClosetPanel ? "translate-x-0" : "translate-x-full"
@@ -529,8 +529,8 @@ export function OutfitBuilderClient({
                     onClick={() => setShowColorPicker(!showColorPicker)}
                   >
                     <Palette className="h-4 w-4" />
-                    <div 
-                      className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50" 
+                    <div
+                      className="h-5 w-5 rounded-full border-2 border-fuchsia-500/50"
                       style={{ backgroundColor: bgColor }}
                     />
                   </Button>
@@ -546,8 +546,8 @@ export function OutfitBuilderClient({
                           }}
                           className={cn(
                             "h-7 w-7 rounded-full border-2 transition-all duration-200 hover:scale-110",
-                            bgColor === color.value 
-                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50" 
+                            bgColor === color.value
+                              ? "border-fuchsia-500 ring-2 ring-fuchsia-500/50"
                               : "border-fuchsia-500/30"
                           )}
                           style={{ backgroundColor: color.value }}
@@ -703,10 +703,12 @@ function PlacedItemView({
 }) {
   const itemRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
-  
-  // Track pinch state
+
+  // Track pinch state for scale AND rotation
   const initialPinchDistance = React.useRef<number | null>(null);
+  const initialPinchAngle = React.useRef<number | null>(null);
   const initialScale = React.useRef(item.scale);
+  const initialRotation = React.useRef(item.rotation);
 
   // Größere Items im Vollbildmodus
   const baseSize = isFullscreen ? 180 : 120;
@@ -716,9 +718,9 @@ function PlacedItemView({
     if (!rect) return { x, y };
     const w = rect.width;
     const h = rect.height;
-    return { 
-      x: Math.max(0, Math.min(x, w - baseSize)), 
-      y: Math.max(0, Math.min(y, h - baseSize)) 
+    return {
+      x: Math.max(0, Math.min(x, w - baseSize)),
+      y: Math.max(0, Math.min(y, h - baseSize))
     };
   };
 
@@ -728,12 +730,18 @@ function PlacedItemView({
     return Math.sqrt(dx * dx + dy * dy);
   };
 
+  const getAngle = (touch1: React.Touch, touch2: React.Touch) => {
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    return Math.atan2(dy, dx) * (180 / Math.PI);
+  };
+
   const handlePointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();
     onSelect();
-    
+
     if (e.pointerType === "touch") return;
-    
+
     setIsDragging(true);
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
@@ -741,7 +749,7 @@ function PlacedItemView({
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
     e.stopPropagation();
-    
+
     const newX = item.x + e.movementX;
     const newY = item.y + e.movementY;
     const clamped = clampToBoard(newX, newY);
@@ -758,53 +766,66 @@ function PlacedItemView({
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
     onSelect();
-    
+
     if (e.touches.length === 1) {
       setIsDragging(true);
     } else if (e.touches.length === 2) {
       setIsDragging(false);
       initialPinchDistance.current = getDistance(e.touches[0], e.touches[1]);
+      initialPinchAngle.current = getAngle(e.touches[0], e.touches[1]);
       initialScale.current = item.scale;
+      initialRotation.current = item.rotation;
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     if (e.touches.length === 1 && isDragging) {
       const touch = e.touches[0];
       const rect = boardRef.current?.getBoundingClientRect();
       if (!rect) return;
-      
+
       const newX = touch.clientX - rect.left - 60;
       const newY = touch.clientY - rect.top - 60;
       const clamped = clampToBoard(newX, newY);
       onUpdate({ x: clamped.x, y: clamped.y });
-    } else if (e.touches.length === 2 && initialPinchDistance.current !== null) {
+    } else if (e.touches.length === 2 && initialPinchDistance.current !== null && initialPinchAngle.current !== null) {
+      // Berechne Scale
       const currentDistance = getDistance(e.touches[0], e.touches[1]);
       const scaleFactor = currentDistance / initialPinchDistance.current;
       const newScale = Math.max(0.3, Math.min(3, initialScale.current * scaleFactor));
-      onUpdate({ scale: newScale });
+
+      // Berechne Rotation
+      const currentAngle = getAngle(e.touches[0], e.touches[1]);
+      const angleDelta = currentAngle - initialPinchAngle.current;
+      let newRotation = (initialRotation.current + angleDelta) % 360;
+      if (newRotation < 0) newRotation += 360;
+
+      onUpdate({ scale: newScale, rotation: newRotation });
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     e.stopPropagation();
-    
+
     if (e.touches.length === 0) {
       setIsDragging(false);
       initialPinchDistance.current = null;
+      initialPinchAngle.current = null;
     } else if (e.touches.length === 1) {
       initialPinchDistance.current = null;
+      initialPinchAngle.current = null;
       initialScale.current = item.scale;
+      initialRotation.current = item.rotation;
     }
   };
 
   const handleWheel = (e: React.WheelEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     const newScale = Math.max(0.3, Math.min(3, item.scale + delta));
     onUpdate({ scale: newScale });
@@ -839,20 +860,20 @@ function PlacedItemView({
       >
         <div className="relative select-none" style={{ width: baseSize, height: baseSize }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src={item.imageUrl} 
-            alt="" 
-            className="h-full w-full object-contain pointer-events-none" 
+          <img
+            src={item.imageUrl}
+            alt=""
+            className="h-full w-full object-contain pointer-events-none"
             style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.4))" }}
             draggable={false}
           />
           {selected && (
-            <div 
-              className="absolute inset-0 rounded-lg ring-2 ring-fuchsia-500 ring-offset-0 pointer-events-none" 
-              style={{ 
+            <div
+              className="absolute inset-0 rounded-lg ring-2 ring-fuchsia-500 ring-offset-0 pointer-events-none"
+              style={{
                 background: "radial-gradient(circle, rgba(255,20,147,0.15) 0%, transparent 70%)",
                 boxShadow: "0 0 20px rgba(255,20,147,0.4)"
-              }} 
+              }}
             />
           )}
         </div>

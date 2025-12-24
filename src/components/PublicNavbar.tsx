@@ -11,7 +11,7 @@ export function PublicNavbar() {
             <Sparkles className="h-5 w-5 text-fuchsia-400" />
           </span>
           <span className="font-display text-lg font-bold uppercase tracking-wider y2k-gradient-text">
-            DollCloset
+            Laura's Closet
           </span>
         </Link>
 
